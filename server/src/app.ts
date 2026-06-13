@@ -3,6 +3,10 @@ import cors from "cors";
 import helmet from "helmet"
 import morgan from "morgan";
 
+import routes from "./routes/index.js";
+import { notFoundMiddleware } from "./middlewares/notFound.middleware.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
+
 const app = express();
 
 app.use(helmet());
@@ -10,11 +14,9 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.get("/api/health", (_req, res) => {
-    res.status(200).json({
-        status: "ok",
-        message: "KalTech API is running",
-    });
-});
+app.use("/api", routes);
+
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
 
 export default app;

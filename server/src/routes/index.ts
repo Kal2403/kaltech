@@ -1,0 +1,12 @@
+import { Router } from "express";
+
+const router = Router();
+
+router.get("/health", (_req, res) => {
+    res.status(200).json({
+        status: "ok",
+        message: "KalTech Api is running",
+    });
+});
+
+export default router;
