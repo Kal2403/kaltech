@@ -8,7 +8,7 @@ interface IOrderItem {
     image?: string;
 }
 
-interface IShippingAdrees {
+interface IShippingAddrees {
     fullName: string,
     address: string,
     city: string;
@@ -20,7 +20,7 @@ interface IShippingAdrees {
 export interface IOrder extends Document {
     user: Types.ObjectId;
     items: IOrderItem[];
-    shippingAddress: IShippingAdrees;
+    shippingAddress: IShippingAddrees;
     paymentMethod: "card" | "paypal" | "cash";
     paymentStatus: "pending" | "paid" | "failed";
     orderStatus: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
@@ -58,7 +58,7 @@ const orderItemSchema = new Schema<IOrderItem>(
     { _id: false }
 );
 
-const shippingAddressSchema = new Schema<IShippingAdrees>(
+const shippingAddressSchema = new Schema<IShippingAddrees>(
     {
         fullName: { type: String, required: true },
         address: { type: String, required: true },
@@ -132,4 +132,4 @@ const orderSchema = new Schema<IOrder>(
     }
 );
 
-export const Order = mongoose.model<IOrder>("Product", orderSchema);
+export const Order = mongoose.model<IOrder>("Order", orderSchema);
