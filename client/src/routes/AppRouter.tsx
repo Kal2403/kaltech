@@ -10,21 +10,21 @@ import { ProductsPage } from "../pages/ProductsPage";
 import { RegisterPage } from "../pages/RegisterPage";
 
 const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <MainLayout />,
-        errorElement: <NotFoundPage />,
-        children: [
-            { index: true, element: <HomePage /> },
-            { path: "products", element: <ProductsPage /> },
-            { path: "products/:id", element: <ProductDetailsPage /> },
-            { path: "cart", element: <CartPage /> },
-            { path: "login", element: <LoginPage /> },
-            { path: "register", element: <RegisterPage /> },
-        ]
-    }
+  {
+    path: "/",
+    element: <MainLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: "products", element: <ProductsPage /> },
+      { path: "products/:id", element: <ProductDetailsPage /> },
+      { path: "cart", element: <CartPage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
+    ],
+  },
 ]);
 
 export const AppRouter = () => {
-    return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />;
 };
