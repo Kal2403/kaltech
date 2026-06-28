@@ -6,8 +6,8 @@ import { HomePage } from "../pages/HomePage";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
-import { ProductsPage } from "../pages/ProductsPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { ProductCatalogPage } from "../pages/ProductCatalogPage";
 
 const router = createBrowserRouter([
   {
@@ -16,7 +16,7 @@ const router = createBrowserRouter([
     errorElement: <NotFoundPage />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "products", element: <ProductsPage /> },
+      { path: "products", element: <ProductCatalogPage /> },
       { path: "products/:id", element: <ProductDetailsPage /> },
       { path: "cart", element: <CartPage /> },
       { path: "login", element: <LoginPage /> },
