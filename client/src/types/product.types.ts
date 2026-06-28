@@ -13,7 +13,7 @@ export interface Product {
     discountPrice?: number;
     stock: number;
     images: string[];
-    brank?: string;
+    brand?: string;
     category: ProductCatgory;
     specs?: Record<string, string>;
     isFeatured: boolean;
