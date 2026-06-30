@@ -1,4 +1,5 @@
 import type { Product } from "../../types/product.types";
+import { Link } from "react-router-dom";
 
 interface ProductCardProps {
     product: Product;
@@ -43,9 +44,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                     )}
                 </div>
 
-                <button className="mt-5 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700">
+                <Link to={`/products/${product._id}`} className="mt-5 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700">
                     Ver detalles
-                </button>
+                </Link>
             </div>
         </article>
     );
