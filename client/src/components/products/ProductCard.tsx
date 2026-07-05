@@ -13,7 +13,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-500 hover:shadow-xl">
             <div className="aspect-square bg-slate-100 p-5">
                 <img
-                    src={product.images[0] ?? "https://placehold.co/600x600"}
+                    src={product.images[0] ?? "https://unsplash.com/es/fotos/un-macbook-con-lineas-de-codigo-en-su-pantalla-en-un-escritorio-ocupado-m_HRfLhgABo"}
                     alt={product.name}
                     className="h-full w-full rounded-xl object-cover"
                 />

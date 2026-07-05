@@ -1,10 +1,13 @@
 import { Link, useParams } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
 
 import { useProductDetails } from "../hooks/useProductDetails";
 
 export const ProductDetailsPage = () => {
     const { id } = useParams();
     const { product, isLoading, error } = useProductDetails(id);
+
+    const { addItem, isMutating, error: cartError } = useCart();
 
     if (isLoading) {
         return (
@@ -46,7 +49,7 @@ export const ProductDetailsPage = () => {
                 <div className="grid gap-10 rounded-3xl bg-white p-6 shadow-sm lg:grid-cols-2 lg:p-10">
                     <div className="rounded-2xl bg-slate-100 p-6">
                         <img
-                            src={product.images[0] ?? "https://placehold.co/800x800"}
+                            src={product.images[0] ?? "https://unsplash.com/es/fotos/un-macbook-con-lineas-de-codigo-en-su-pantalla-en-un-escritorio-ocupado-m_HRfLhgABo"}
                             alt={product.name}
                             className="h-full max-h-130 w-full rounded-xl object-cover"
                         />
@@ -113,11 +116,18 @@ export const ProductDetailsPage = () => {
                         )}
 
                         <button
-                            disabled={product.stock <= 0}
+                            disabled={product.stock <= 0 || isMutating}
+                            onClick={() => addItem(product._id, 1)}
                             className="mt-8 w-full rounded-xl bg-blue-600 px-6 py-4 font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                         >
-                            Agregar al carrito
+                            {isMutating ? "Agregando... " : "Agregar al carrito"}
                         </button>
+
+                        {cartError && (
+                            <p className="mt-3 text-sm font-semibold text-red-600">
+                                {cartError}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
