@@ -7,6 +7,9 @@ export const errorMiddleware = (
     res: Response,
     _next: NextFunction
 ) => {
+
+    console.error("GLOBAL ERROR:", error);
+
     if (error instanceof ApiError) {
         return res.status(error.statusCode).json({
             success: false,
