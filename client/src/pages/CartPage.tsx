@@ -1,7 +1,12 @@
+import { useNavigate } from "react-router-dom";
+
 import { CartItemCard, CartSummary, EmptyCart } from "../components/cart";
 import { useCart } from "../hooks/useCart";
+import { ROUTES } from "../routes/paths"
 
 export const CartPage = () => {
+    const navigate = useNavigate();
+
     const {
         items,
         subTotal,
@@ -13,6 +18,10 @@ export const CartPage = () => {
         removeItem,
         clearCart,
     } = useCart();
+
+    const handleCheckout = () => {
+        navigate(ROUTES.checkout);
+    };
 
     if (isLoading) {
         return (
@@ -61,10 +70,10 @@ export const CartPage = () => {
                 {items.length === 0 ? (
                     <EmptyCart />
                 ) : (
-                    <div className="grip gap-8 lg:grid-cols-[1fr_360px]">
+                    <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
                         <div className="space-y-5">
                             {items.map((item) => (
-                                <CartItemCard 
+                                <CartItemCard
                                     key={item.product._id}
                                     item={item}
                                     isMutating={isMutating}
@@ -74,10 +83,11 @@ export const CartPage = () => {
                             ))}
                         </div>
 
-                        <CartSummary 
+                        <CartSummary
                             subTotal={subTotal}
                             totalItems={totalItems}
                             isDisabled={isMutating}
+                            onCheckout={handleCheckout}
                         />
                     </div>
                 )}
