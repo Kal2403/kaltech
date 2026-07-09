@@ -2,9 +2,15 @@ interface CartSummaryProps {
     subTotal: number;
     totalItems: number;
     isDisabled?: boolean;
+    onCheckout: () => void;
 }
 
-export const CartSummary = ({ subTotal, totalItems, isDisabled = false }: CartSummaryProps) => {
+export const CartSummary = ({ 
+    subTotal, 
+    totalItems, 
+    isDisabled = false,
+    onCheckout,
+}: CartSummaryProps) => {
     const tax = Number((subTotal * 0.18).toFixed(2));
     const shippingCost = subTotal > 1000 || subTotal === 0 ? 0 : 25;
     const total = subTotal + tax + shippingCost;
@@ -45,6 +51,7 @@ export const CartSummary = ({ subTotal, totalItems, isDisabled = false }: CartSu
             <button
                 type="button"
                 disabled={isDisabled || totalItems === 0}
+                onClick={onCheckout}
                 className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-4 font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
                 Continuar al Checkout
