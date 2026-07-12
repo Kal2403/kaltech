@@ -1,0 +1,141 @@
+import { Link, useParams } from "react-router-dom";
+
+import {
+    OrderItem,
+    OrderSummary,
+} from "../components/orders";
+import { useOrderDetails } from "../hooks/useOrderDetails";
+import { ROUTES } from "../routes/paths";
+
+export const OrderDetailsPage = () => {
+    const { id } = useParams<{ id: string }>();
+
+    const {
+        order,
+        isLoading,
+        error,
+        reloadOrder,
+    } = useOrderDetails(id);
+
+    if (isLoading) {
+        return (
+            <section className="min-h-screen bg-slate-50 px-6 py-16">
+                <div className="mx-auto max-w-7xl">
+                    <p className="text-lg font-semibold text-slate-700">
+                        Cargando detalle de la orden...
+                    </p>
+                </div>
+            </section>
+        );
+    }
+
+    if (error || !order) {
+        return (
+            <section className="min-h-screen bg-slate-50 px-6 py-16">
+                <div className="mx-auto max-w-7xl">
+                    <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+                        <p className="font-semibold text-red-600">
+                            {error ?? "No se encontró la orden solicitada."}
+                        </p>
+
+                        <div className="mt-6 flex flex-wrap gap-3">
+                            <button
+                                type="button"
+                                onClick={() => void reloadOrder()}
+                                className="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700"
+                            >
+                                Intentar nuevamente
+                            </button>
+
+                            <Link
+                                to={ROUTES.orders}
+                                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+                            >
+                                Volver a mis órdenes
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
+    const formattedDate = new Intl.DateTimeFormat("es-ES", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).format(new Date(order.createdAt));
+
+    return (
+        <section className="min-h-screen bg-slate-50 px-6 py-16">
+            <div className="mx-auto max-w-7xl">
+                <div className="mb-10">
+                    <Link
+                        to={ROUTES.orders}
+                        className="text-sm font-bold text-blue-600 transition hover:text-blue-700"
+                    >
+                        ← Volver a mis órdenes
+                    </Link>
+
+                    <p className="mt-6 text-sm font-black uppercase tracking-wide text-blue-600">
+                        Detalle de la orden
+                    </p>
+
+                    <h1 className="mt-2 break-all text-3xl font-black text-slate-950 md:text-4xl">
+                        Orden #{order._id}
+                    </h1>
+
+                    <p className="mt-3 text-slate-600">
+                        Realizada el {formattedDate}
+                    </p>
+                </div>
+
+                <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+                    <div className="space-y-8">
+                        <section>
+                            <h2 className="mb-5 text-2xl font-black text-slate-950">
+                                Productos
+                            </h2>
+
+                            <div className="space-y-4">
+                                {order.items.map((item) => (
+                                    <OrderItem
+                                        key={`${item.product}-${item.name}`}
+                                        item={item}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                            <h2 className="text-2xl font-black text-slate-950">
+                                Dirección de envío
+                            </h2>
+
+                            <div className="mt-5 space-y-2 text-slate-600">
+                                <p className="font-bold text-slate-900">
+                                    {order.shippingAddress.fullName}
+                                </p>
+
+                                <p>{order.shippingAddress.address}</p>
+
+                                <p>
+                                    {order.shippingAddress.city},{" "}
+                                    {order.shippingAddress.postalCode}
+                                </p>
+
+                                <p>{order.shippingAddress.country}</p>
+
+                                <p>{order.shippingAddress.phone}</p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <OrderSummary order={order} />
+                </div>
+            </div>
+        </section>
+    );
+};

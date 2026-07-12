@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FiMenu, FiSearch, FiShoppingCart, FiUser, FiX } from "react-icons/fi";
+import {
+    FiMenu,
+    FiSearch,
+    FiShoppingCart,
+    FiUser,
+    FiX,
+} from "react-icons/fi";
 
 import { ROUTES } from "../../routes/paths";
 
 const navLinks = [
     { label: "Home", path: ROUTES.home },
     { label: "Products", path: ROUTES.products },
+    { label: "My Orders", path: ROUTES.orders },
     { label: "Categories", path: "/categories" },
     { label: "Deals", path: "/deals" },
 ];
@@ -17,9 +24,12 @@ export const Navbar = () => {
     return (
         <header className="sticky top-0 z-50 bg-white px-4 py-4 shadow-sm">
             <nav className="mx-auto flex max-w-7xl items-center gap-6 rounded-2xl bg-white">
-                <Link to={ROUTES.home} className="text-3xl font-black tracking-tight">
-                    <span className="text-blue-600">KAL</span>
-                    <span className="text-slate-950">TECH</span>
+                <Link
+                    to={ROUTES.home}
+                    className="text-3xl font-black tracking-tight"
+                >
+                    <span className="text-blue-600">Kal</span>
+                    <span className="text-slate-950">Tech</span>
                 </Link>
 
                 <div className="hidden items-center gap-10 lg:flex">
@@ -28,13 +38,16 @@ export const Navbar = () => {
                             key={link.path}
                             to={link.path}
                             className={({ isActive }) =>
-                                `relative text-base font-bold transition hover:text-blue-600 ${isActive ? "text-blue-600" : "text-slate-950"
+                                `relative text-base font-bold transition hover:text-blue-600 ${isActive
+                                    ? "text-blue-600"
+                                    : "text-slate-950"
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
                                     {link.label}
+
                                     {isActive && (
                                         <span className="absolute -bottom-7 left-0 h-1 w-full rounded-full bg-blue-600" />
                                     )}
@@ -44,13 +57,15 @@ export const Navbar = () => {
                     ))}
                 </div>
 
-                <div className="ml-auto hidden flex-1 max-w-xl items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 lg:flex">
+                <div className="ml-auto hidden max-w-xl flex-1 items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 lg:flex">
                     <FiSearch className="text-xl text-slate-500" />
+
                     <input
                         type="text"
                         placeholder="Search laptops, phones, accessories..."
                         className="ml-3 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
                     />
+
                     <FiSearch className="text-xl text-slate-950" />
                 </div>
 
@@ -58,6 +73,7 @@ export const Navbar = () => {
                     <Link
                         to={ROUTES.cart}
                         className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-100 text-2xl text-slate-950 shadow-sm transition hover:text-blue-600"
+                        aria-label="View shopping cart"
                     >
                         <FiShoppingCart />
                     </Link>
@@ -73,8 +89,9 @@ export const Navbar = () => {
 
                 <button
                     type="button"
+                    aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
                     className="ml-auto text-3xl lg:hidden"
-                    onClick={() => setIsOpen((prev) => !prev)}
+                    onClick={() => setIsOpen((previousState) => !previousState)}
                 >
                     {isOpen ? <FiX /> : <FiMenu />}
                 </button>
@@ -84,6 +101,7 @@ export const Navbar = () => {
                 <div className="mx-auto mt-4 max-w-7xl rounded-2xl border border-slate-100 bg-white p-4 shadow-lg lg:hidden">
                     <div className="mb-4 flex items-center rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <FiSearch className="text-xl text-slate-500" />
+
                         <input
                             type="text"
                             placeholder="Search products..."
