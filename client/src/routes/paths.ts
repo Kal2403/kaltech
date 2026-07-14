@@ -8,4 +8,9 @@ export const ROUTES = {
     orderDetails: "/orders/:id",
     login: "/login",
     register: "/register",
+
+    admin: "/admin",
+    adminProducts: "/admin/products",
+    adminCategories: "/admin/categories",
+    adminOrders: "/admin/orders",
 } as const;

@@ -1,6 +1,8 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+import { AdminLayout } from "../layouts/AdminLayout";
 import { MainLayout } from "../layouts/MainLayout";
+
 import { CartPage } from "../pages/CartPage";
 import { CheckoutPage } from "../pages/CheckoutPage";
 import { HomePage } from "../pages/HomePage";
@@ -11,6 +13,7 @@ import { OrdersPage } from "../pages/OrdersPage";
 import { ProductCatalogPage } from "../pages/ProductCatalogPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { DashboardPage } from "../pages/admin/DashboardPage";
 
 const router = createBrowserRouter([
     {
@@ -27,6 +30,17 @@ const router = createBrowserRouter([
             { path: "orders/:id", element: <OrderDetailsPage /> },
             { path: "login", element: <LoginPage /> },
             { path: "register", element: <RegisterPage /> },
+        ],
+    },
+    {
+        path: "/admin",
+        element: <AdminLayout />,
+        errorElement: <NotFoundPage />,
+        children: [
+            {
+                index: true,
+                element: <DashboardPage />,
+            },
         ],
     },
 ]);
