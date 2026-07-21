@@ -13,7 +13,11 @@ import { OrdersPage } from "../pages/OrdersPage";
 import { ProductCatalogPage } from "../pages/ProductCatalogPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
+
+import { AdminProductsPage } from "../pages/admin/AdminProductsPage";
+import { CreateProductPage } from "../pages/admin/CreateProductPage";
 import { DashboardPage } from "../pages/admin/DashboardPage";
+import { EditProductPage } from "../pages/admin/EditProductPage";
 
 const router = createBrowserRouter([
     {
@@ -21,15 +25,42 @@ const router = createBrowserRouter([
         element: <MainLayout />,
         errorElement: <NotFoundPage />,
         children: [
-            { index: true, element: <HomePage /> },
-            { path: "products", element: <ProductCatalogPage /> },
-            { path: "products/:id", element: <ProductDetailsPage /> },
-            { path: "cart", element: <CartPage /> },
-            { path: "checkout", element: <CheckoutPage /> },
-            { path: "orders", element: <OrdersPage /> },
-            { path: "orders/:id", element: <OrderDetailsPage /> },
-            { path: "login", element: <LoginPage /> },
-            { path: "register", element: <RegisterPage /> },
+            {
+                index: true,
+                element: <HomePage />,
+            },
+            {
+                path: "products",
+                element: <ProductCatalogPage />,
+            },
+            {
+                path: "products/:id",
+                element: <ProductDetailsPage />,
+            },
+            {
+                path: "cart",
+                element: <CartPage />,
+            },
+            {
+                path: "checkout",
+                element: <CheckoutPage />,
+            },
+            {
+                path: "orders",
+                element: <OrdersPage />,
+            },
+            {
+                path: "orders/:id",
+                element: <OrderDetailsPage />,
+            },
+            {
+                path: "login",
+                element: <LoginPage />,
+            },
+            {
+                path: "register",
+                element: <RegisterPage />,
+            },
         ],
     },
     {
@@ -40,6 +71,18 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <DashboardPage />,
+            },
+            {
+                path: "products",
+                element: <AdminProductsPage />,
+            },
+            {
+                path: "products/new",
+                element: <CreateProductPage />,
+            },
+            {
+                path: "products/:id/edit",
+                element: <EditProductPage />,
             },
         ],
     },
