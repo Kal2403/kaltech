@@ -16,3 +16,5 @@ export interface CreateCategoryPayload {
     image?: string;
     isActive?: boolean;
 }
+
+export type UpdateCategoryPayload = Partial<CreateCategoryPayload>;
