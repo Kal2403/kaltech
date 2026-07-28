@@ -16,8 +16,10 @@ import { RegisterPage } from "../pages/RegisterPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
 import { AdminProductsPage } from "../pages/admin/AdminProductsPage";
+import { CreateCategoryPage } from "../pages/admin/CreateCategoryPage";
 import { CreateProductPage } from "../pages/admin/CreateProductPage";
 import { DashboardPage } from "../pages/admin/DashboardPage";
+import { EditCategoryPage } from "../pages/admin/EditCategoryPage";
 import { EditProductPage } from "../pages/admin/EditProductPage";
 
 const router = createBrowserRouter([
@@ -88,6 +90,14 @@ const router = createBrowserRouter([
             {
                 path: "categories",
                 element: <AdminCategoriesPage />,
+            },
+            {
+                path: "categories/new",
+                element: <CreateCategoryPage />,
+            },
+            {
+                path: "categories/:id/edit",
+                element: <EditCategoryPage />,
             },
         ],
     },
