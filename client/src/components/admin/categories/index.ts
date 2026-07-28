@@ -1,0 +1,1 @@
+export { AdminCategoryTable } from "./AdminCategoryTable";

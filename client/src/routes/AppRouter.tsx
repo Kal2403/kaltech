@@ -14,6 +14,7 @@ import { ProductCatalogPage } from "../pages/ProductCatalogPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
 
+import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
 import { AdminProductsPage } from "../pages/admin/AdminProductsPage";
 import { CreateProductPage } from "../pages/admin/CreateProductPage";
 import { DashboardPage } from "../pages/admin/DashboardPage";
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
             {
                 path: "products/:id/edit",
                 element: <EditProductPage />,
+            },
+            {
+                path: "categories",
+                element: <AdminCategoriesPage />,
             },
         ],
     },
