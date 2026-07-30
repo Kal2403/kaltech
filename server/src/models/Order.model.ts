@@ -1,6 +1,21 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, {
+    Schema,
+    type Document,
+    type Types,
+} from "mongoose";
 
-interface IOrderItem {
+export type PaymentMethod = "card" | "paypal" | "cash";
+
+export type PaymentStatus = "pending" | "paid" | "failed";
+
+export type OrderStatus =
+    | "pending"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
+
+export interface IOrderItem {
     product: Types.ObjectId;
     name: string;
     quantity: number;
@@ -8,9 +23,9 @@ interface IOrderItem {
     image?: string;
 }
 
-interface IShippingAddrees {
-    fullName: string,
-    address: string,
+export interface IShippingAddress {
+    fullName: string;
+    address: string;
     city: string;
     postalCode: string;
     country: string;
@@ -20,14 +35,16 @@ interface IShippingAddrees {
 export interface IOrder extends Document {
     user: Types.ObjectId;
     items: IOrderItem[];
-    shippingAddress: IShippingAddrees;
-    paymentMethod: "card" | "paypal" | "cash";
-    paymentStatus: "pending" | "paid" | "failed";
-    orderStatus: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+    shippingAddress: IShippingAddress;
+    paymentMethod: PaymentMethod;
+    paymentStatus: PaymentStatus;
+    orderStatus: OrderStatus;
     subtotal: number;
     tax: number;
     shippingCost: number;
     total: number;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const orderItemSchema = new Schema<IOrderItem>(
@@ -40,6 +57,7 @@ const orderItemSchema = new Schema<IOrderItem>(
         name: {
             type: String,
             required: true,
+            trim: true,
         },
         quantity: {
             type: Number,
@@ -53,22 +71,51 @@ const orderItemSchema = new Schema<IOrderItem>(
         },
         image: {
             type: String,
+            trim: true,
         },
     },
-    { _id: false }
+    {
+        _id: false,
+    }
 );
 
-const shippingAddressSchema = new Schema<IShippingAddrees>(
+const shippingAddressSchema = new Schema<IShippingAddress>(
     {
-        fullName: { type: String, required: true },
-        address: { type: String, required: true },
-        city: { type: String, required: true },
-        postalCode: { type: String, required: true },
-        country: { type: String, required: true },
-        phone: { type: String, required: true },
+        fullName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        address: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        city: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        postalCode: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        country: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        phone: {
+            type: String,
+            required: true,
+            trim: true,
+        },
     },
-    { _id: false }
-)
+    {
+        _id: false,
+    }
+);
 
 const orderSchema = new Schema<IOrder>(
     {
@@ -76,6 +123,7 @@ const orderSchema = new Schema<IOrder>(
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
         items: {
             type: [orderItemSchema],
@@ -98,11 +146,19 @@ const orderSchema = new Schema<IOrder>(
             type: String,
             enum: ["pending", "paid", "failed"],
             default: "pending",
+            index: true,
         },
         orderStatus: {
             type: String,
-            enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+            enum: [
+                "pending",
+                "processing",
+                "shipped",
+                "delivered",
+                "cancelled",
+            ],
             default: "pending",
+            index: true,
         },
         subtotal: {
             type: Number,
@@ -132,4 +188,11 @@ const orderSchema = new Schema<IOrder>(
     }
 );
 
-export const Order = mongoose.model<IOrder>("Order", orderSchema);
+orderSchema.index({
+    createdAt: -1,
+});
+
+export const Order = mongoose.model<IOrder>(
+    "Order",
+    orderSchema
+);
