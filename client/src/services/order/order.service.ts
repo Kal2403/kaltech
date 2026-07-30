@@ -1,8 +1,10 @@
 import { api } from "../../api/axios";
 
 import type {
+    AdminOrder,
     CreateOrderPayload,
     Order,
+    UpdateOrderStatusPayload,
 } from "../../types/order.types";
 
 interface CreateOrderResponse {
@@ -26,6 +28,30 @@ interface GetOrderByIdResponse {
     message: string;
     data: {
         order: Order;
+    };
+}
+
+interface GetAdminOrdersResponse {
+    success: boolean;
+    message: string;
+    data: {
+        orders: AdminOrder[];
+    };
+}
+
+interface GetAdminOrderByIdResponse {
+    success: boolean;
+    message: string;
+    data: {
+        order: AdminOrder;
+    };
+}
+
+interface UpdateOrderStatusResponse {
+    success: boolean;
+    message: string;
+    data: {
+        order: AdminOrder;
     };
 }
 
@@ -54,6 +80,38 @@ export const getOrderById = async (
     const { data } = await api.get<GetOrderByIdResponse>(
         `/orders/${orderId}`
     );
+
+    return data.data.order;
+};
+
+export const getAdminOrders = async (): Promise<AdminOrder[]> => {
+    const { data } = await api.get<GetAdminOrdersResponse>(
+        "/orders/admin"
+    );
+
+    return data.data.orders;
+};
+
+export const getAdminOrderById = async (
+    orderId: string
+): Promise<AdminOrder> => {
+    const { data } =
+        await api.get<GetAdminOrderByIdResponse>(
+            `/orders/admin/${orderId}`
+        );
+
+    return data.data.order;
+};
+
+export const updateOrderStatus = async (
+    orderId: string,
+    payload: UpdateOrderStatusPayload
+): Promise<AdminOrder> => {
+    const { data } =
+        await api.patch<UpdateOrderStatusResponse>(
+            `/orders/admin/${orderId}/status`,
+            payload
+        );
 
     return data.data.order;
 };
