@@ -1,4 +1,7 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+    createBrowserRouter,
+    RouterProvider,
+} from "react-router-dom";
 
 import { AdminLayout } from "../layouts/AdminLayout";
 import { MainLayout } from "../layouts/MainLayout";
@@ -15,6 +18,7 @@ import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
+import { AdminOrdersPage } from "../pages/admin/AdminOrdersPage";
 import { AdminProductsPage } from "../pages/admin/AdminProductsPage";
 import { CreateCategoryPage } from "../pages/admin/CreateCategoryPage";
 import { CreateProductPage } from "../pages/admin/CreateProductPage";
@@ -98,6 +102,10 @@ const router = createBrowserRouter([
             {
                 path: "categories/:id/edit",
                 element: <EditCategoryPage />,
+            },
+            {
+                path: "orders",
+                element: <AdminOrdersPage />,
             },
         ],
     },
