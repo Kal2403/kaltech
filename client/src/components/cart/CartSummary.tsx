@@ -1,61 +1,6 @@
-interface CartSummaryProps {
-    subTotal: number;
-    totalItems: number;
-    isDisabled?: boolean;
-    onCheckout: () => void;
-}
-
-export const CartSummary = ({ 
-    subTotal, 
-    totalItems, 
-    isDisabled = false,
-    onCheckout,
-}: CartSummaryProps) => {
-    const tax = Number((subTotal * 0.18).toFixed(2));
-    const shippingCost = subTotal > 1000 || subTotal === 0 ? 0 : 25;
-    const total = subTotal + tax + shippingCost;
-
-    return (
-        <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-black text-slate-600">Resume</h2>
-
-            <div className="mt-6 space-y-4">
-                <div className="flex justify-between text-slate-600">
-                    <span>Productos</span>
-                    <span>{totalItems}</span>
-                </div>
-
-                <div className="flex justify-between text-slate-600">
-                    <span>Subtotal</span>
-                    <span>${subTotal.toFixed(2)}</span>
-                </div>
-
-                <div className="flex justify-between text-slate-600">
-                    <span>Impuestos</span>
-                    <span>${tax.toFixed(2)}</span>
-                </div>
-
-                <div className="flex justify-between text-slate-600">
-                    <span>Envio</span>
-                    <span>{shippingCost === 0 ? "Gratis" : `$${shippingCost.toFixed(2)}`}</span>
-                </div>
-
-                <div className="border-t border-slate-200 pt-4">
-                    <div className="flex justify-between text-xl font-black text-slate-950">
-                        <span>Total</span>
-                        <span>${total.toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-
-            <button
-                type="button"
-                disabled={isDisabled || totalItems === 0}
-                onClick={onCheckout}
-                className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-4 font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-                Continuar al Checkout
-            </button>
-        </aside>
-    );
+import { FiArrowRight } from 'react-icons/fi';
+interface CartSummaryProps { subTotal: number; totalItems: number; isDisabled?: boolean; onCheckout: () => void; }
+export const CartSummary = ({ subTotal, totalItems, isDisabled = false, onCheckout }: CartSummaryProps) => {
+    const tax = Number((subTotal * 0.18).toFixed(2)); const shippingCost = subTotal > 1000 || subTotal === 0 ? 0 : 25; const total = subTotal + tax + shippingCost;
+    return <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.4)] lg:sticky lg:top-24" aria-labelledby="cart-summary-title"><div className="flex items-center justify-between"><h2 id="cart-summary-title" className="text-xl font-black text-slate-950">Resumen</h2><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">{totalItems} artículos</span></div><dl className="mt-6 space-y-4 text-sm"><div className="flex justify-between text-slate-600"><dt>Subtotal</dt><dd className="font-bold text-slate-900">${subTotal.toFixed(2)}</dd></div><div className="flex justify-between text-slate-600"><dt>Impuestos</dt><dd className="font-bold text-slate-900">${tax.toFixed(2)}</dd></div><div className="flex justify-between text-slate-600"><dt>Envío</dt><dd className="font-bold text-emerald-600">{shippingCost === 0 ? 'Gratis' : `$${shippingCost.toFixed(2)}`}</dd></div><div className="flex justify-between border-t border-slate-200 pt-5 text-xl font-black text-slate-950"><dt>Total</dt><dd>${total.toFixed(2)}</dd></div></dl><button type="button" disabled={isDisabled || totalItems === 0} onClick={onCheckout} className="mt-6 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-300">Continuar al pago <FiArrowRight aria-hidden="true" /></button><p className="mt-4 text-center text-xs font-medium text-slate-500">Los importes se calculan antes de crear la orden.</p></aside>;
 };

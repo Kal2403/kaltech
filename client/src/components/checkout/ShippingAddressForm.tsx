@@ -1,77 +1,29 @@
 import type { ShippingAddress } from '../../types/order.types';
 
-interface ShippingAddressFormProps {
-    shippingAddress: ShippingAddress;
-    onChange: (field: keyof ShippingAddress, value: string) => void;
-    disabled?: boolean;
-}
+interface ShippingAddressFormProps { shippingAddress: ShippingAddress; onChange: (field: keyof ShippingAddress, value: string) => void; disabled?: boolean; }
 
-export const ShippingAddressForm = ({
-    shippingAddress,
-    onChange,
-    disabled = false,
-}: ShippingAddressFormProps) => {
-    return (
-        <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
-                Shipping Address
-            </h2>
+const fields: { key: keyof ShippingAddress; label: string; placeholder: string; autoComplete: string; type?: string }[] = [
+    { key: 'fullName', label: 'Nombre completo', placeholder: 'Juan Pérez', autoComplete: 'name' },
+    { key: 'address', label: 'Dirección', placeholder: 'Calle y número', autoComplete: 'street-address' },
+    { key: 'city', label: 'Ciudad', placeholder: 'Madrid', autoComplete: 'address-level2' },
+    { key: 'postalCode', label: 'Código postal', placeholder: '28001', autoComplete: 'postal-code' },
+    { key: 'country', label: 'País', placeholder: 'España', autoComplete: 'country-name' },
+    { key: 'phone', label: 'Teléfono', placeholder: '+34 600 000 000', autoComplete: 'tel', type: 'tel' },
+];
 
-            <div className="grid gap-4">
-                <input
-                    type="text"
-                    value={shippingAddress.fullName}
-                    onChange={(event) => onChange('fullName', event.target.value)}
-                    disabled={disabled}
-                    placeholder="Full name"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black disabled:bg-gray-100"
-                />
-
-                <input
-                    type="text"
-                    value={shippingAddress.address}
-                    onChange={(event) => onChange('address', event.target.value)}
-                    disabled={disabled}
-                    placeholder="Address"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black disabled:bg-gray-100"
-                />
-
-                <input
-                    type="text"
-                    value={shippingAddress.city}
-                    onChange={(event) => onChange('city', event.target.value)}
-                    disabled={disabled}
-                    placeholder="City"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black disabled:bg-gray-100"
-                />
-
-                <input
-                    type="text"
-                    value={shippingAddress.postalCode}
-                    onChange={(event) => onChange('postalCode', event.target.value)}
-                    disabled={disabled}
-                    placeholder="Postal code"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black disabled:bg-gray-100"
-                />
-
-                <input
-                    type="text"
-                    value={shippingAddress.country}
-                    onChange={(event) => onChange('country', event.target.value)}
-                    disabled={disabled}
-                    placeholder="Country"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black disabled:bg-gray-100"
-                />
-
-                <input
-                    type="text"
-                    value={shippingAddress.phone}
-                    onChange={(event) => onChange('phone', event.target.value)}
-                    disabled={disabled}
-                    placeholder="Phone"
-                    className="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black disabled:bg-gray-100"
-                />
-            </div>
-        </section>
-    );
-};
+export const ShippingAddressForm = ({ shippingAddress, onChange, disabled = false }: ShippingAddressFormProps) => (
+    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_60px_-35px_rgba(15,23,42,0.3)] sm:p-7" aria-labelledby="shipping-title">
+        <div className="mb-6 flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 font-black text-blue-600" aria-hidden="true">1</span>
+            <div><h2 id="shipping-title" className="text-xl font-black text-slate-950">Dirección de envío</h2><p className="mt-1 text-sm text-slate-500">Indica dónde quieres recibir tu pedido.</p></div>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+            {fields.map((field, index) => (
+                <label key={field.key} className={`grid gap-2 text-sm font-bold text-slate-700 ${index < 2 ? 'sm:col-span-2' : ''}`}>
+                    {field.label}
+                    <input required type={field.type ?? 'text'} autoComplete={field.autoComplete} value={shippingAddress[field.key]} onChange={(event) => onChange(field.key, event.target.value)} disabled={disabled} placeholder={field.placeholder} className="min-h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 font-medium text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60" />
+                </label>
+            ))}
+        </div>
+    </section>
+);

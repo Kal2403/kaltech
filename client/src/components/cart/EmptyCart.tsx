@@ -1,22 +1,3 @@
-import { Link } from "react-router-dom";
-
-export const EmptyCart = () => {
-    return (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
-            <h2 className="text-3xl font-black text-slate-950">
-                Tu Carrito esta vacio
-            </h2>
-
-            <p className="mx-auto mt-3 max-w-md text-slate-600">
-                Agrega productos al carrito para continuar con tu compra.
-            </p>
-
-            <Link
-                to="/products"
-                className="mt-6 inline-block rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
-            >
-                Explora productos
-            </Link>
-        </div>
-    );
-};
+import { FiArrowRight, FiShoppingBag } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+export const EmptyCart = () => <div className="rounded-3xl border border-dashed border-blue-200 bg-white px-6 py-16 text-center shadow-sm"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl text-blue-600"><FiShoppingBag /></span><h2 className="mt-6 text-2xl font-black text-slate-950 sm:text-3xl">Tu carrito está vacío</h2><p className="mx-auto mt-3 max-w-md text-slate-600">Explora el catálogo y añade la tecnología que necesitas.</p><Link to="/products" className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200">Explorar productos <FiArrowRight /></Link></div>;

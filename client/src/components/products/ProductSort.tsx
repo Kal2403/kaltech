@@ -24,9 +24,10 @@ const sortOptions: Array<{
 export const ProductSort = ({ value, onChange }: ProductSortProps) => {
     return (
         <select
+            aria-label="Ordenar productos"
             value={value}
             onChange={(event) => onChange(event.target.value as SortOption)}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-500"
+            className="min-h-12 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
         >
             {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>

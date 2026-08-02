@@ -1,12 +1,4 @@
-export const NotFoundPage = () => {
-    return (
-        <section className="mx-auto max-w-7xl px-6 py-16">
-            <h1 className="text-4xl font-bold text-slate-900">
-                Welcome to KalTech
-            </h1>
-            <p className="mt-4 text-slate-600">
-                Your destination for modern technology products.
-            </p>
-        </section>
-    );
-};
+import { FiArrowLeft, FiSearch } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../routes/paths';
+export const NotFoundPage = () => <section className="flex min-h-[72vh] items-center bg-gradient-to-b from-blue-50/60 to-white px-5 py-16 sm:px-6"><div className="mx-auto max-w-xl text-center"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl text-blue-600"><FiSearch /></span><p className="mt-7 text-7xl font-black tracking-tight text-blue-600">404</p><h1 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">Esta página no existe</h1><p className="mt-4 text-slate-600">La dirección puede haber cambiado o el contenido ya no está disponible.</p><Link to={ROUTES.home} className="mt-8 inline-flex min-h-12 items-center gap-2 rounded-xl bg-slate-950 px-6 py-3 font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200"><FiArrowLeft /> Volver al inicio</Link></div></section>;

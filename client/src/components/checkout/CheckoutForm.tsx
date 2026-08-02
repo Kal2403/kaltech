@@ -87,7 +87,7 @@ export const CheckoutForm = ({
         );
 
         if (hasEmptyFields) {
-            return 'Please complete all shipping address fields.';
+            return 'Completa todos los campos de la dirección de envío.';
         }
 
         return null;
@@ -96,7 +96,7 @@ export const CheckoutForm = ({
     return (
         <form
             onSubmit={handleSubmit}
-            className="grid gap-8 lg:grid-cols-[2fr_1fr]"
+            className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]"
         >
             <div className="space-y-6">
                 <ShippingAddressForm
@@ -112,7 +112,7 @@ export const CheckoutForm = ({
                 />
 
                 {error && (
-                    <div className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-600">
+                    <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
                         {error}
                     </div>
                 )}

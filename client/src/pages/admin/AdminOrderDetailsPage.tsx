@@ -135,7 +135,7 @@ const OrderItemsSection = ({
     order,
 }: OrderItemsSectionProps) => {
     return (
-        <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">
                     Productos
@@ -252,12 +252,12 @@ export const AdminOrderDetailsPage = () => {
                         Volver a pedidos
                     </button>
 
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-black tracking-tight text-slate-950">
                         Detalle del pedido
                     </h1>
                 </header>
 
-                <div className="flex min-h-64 items-center justify-center rounded-lg border border-gray-200 bg-white">
+                <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
                     <p className="text-sm font-medium text-gray-500">
                         Cargando pedido...
                     </p>
@@ -278,7 +278,7 @@ export const AdminOrderDetailsPage = () => {
                         Volver a pedidos
                     </button>
 
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-black tracking-tight text-slate-950">
                         Detalle del pedido
                     </h1>
                 </header>
@@ -320,7 +320,7 @@ export const AdminOrderDetailsPage = () => {
                         Volver a pedidos
                     </button>
 
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-black tracking-tight text-slate-950">
                         Pedido #
                         {getShortOrderId(order._id)}
                     </h1>
@@ -379,7 +379,7 @@ export const AdminOrderDetailsPage = () => {
                     <OrderItemsSection order={order} />
 
                     <section className="grid gap-6 md:grid-cols-2">
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Cliente
                             </h2>
@@ -393,7 +393,7 @@ export const AdminOrderDetailsPage = () => {
                             </div>
                         </div>
 
-                        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Dirección de envío
                             </h2>
@@ -450,7 +450,7 @@ export const AdminOrderDetailsPage = () => {
                 </div>
 
                 <aside className="space-y-6">
-                    <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-gray-900">
                             Estado del pedido
                         </h2>
@@ -497,7 +497,7 @@ export const AdminOrderDetailsPage = () => {
                         )}
                     </section>
 
-                    <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-gray-900">
                             Pago
                         </h2>
@@ -542,7 +542,7 @@ export const AdminOrderDetailsPage = () => {
                         </div>
                     </section>
 
-                    <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+                    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-gray-900">
                             Resumen
                         </h2>

@@ -302,7 +302,7 @@ export const CategoryForm = ({
                 </div>
             )}
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <div className="mb-6">
                     <h2 className="text-lg font-semibold text-gray-900">
                         Información general
@@ -480,7 +480,7 @@ export const CategoryForm = ({
                 </div>
             </section>
 
-            <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
                 <h2 className="text-lg font-semibold text-gray-900">
                     Configuración
                 </h2>
@@ -521,7 +521,7 @@ export const CategoryForm = ({
                 <button
                     type="submit"
                     disabled={isSubmitting || isUploading}
-                    className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="min-h-11 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {isUploading
                         ? "Subiendo imagen..."

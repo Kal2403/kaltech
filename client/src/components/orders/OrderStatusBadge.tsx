@@ -40,7 +40,7 @@ export const OrderStatusBadge = ({
 
     return (
         <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${currentStatus.className}`}
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ring-current/10 ${currentStatus.className}`}
         >
             {currentStatus.label}
         </span>
