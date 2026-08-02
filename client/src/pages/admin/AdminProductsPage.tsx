@@ -89,7 +89,7 @@ export const AdminProductsPage = () => {
         <section className="space-y-6">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-black tracking-tight text-slate-950">
                         Productos
                     </h1>
 
@@ -101,7 +101,7 @@ export const AdminProductsPage = () => {
                 <button
                     type="button"
                     onClick={handleCreateProduct}
-                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 >
                     Crear producto
                 </button>
@@ -143,7 +143,7 @@ export const AdminProductsPage = () => {
             )}
 
             {isLoading ? (
-                <div className="flex min-h-64 items-center justify-center rounded-lg border border-gray-200 bg-white">
+                <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
                     <p className="text-sm font-medium text-gray-500">
                         Cargando productos...
                     </p>

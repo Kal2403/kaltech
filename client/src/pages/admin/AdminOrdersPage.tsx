@@ -67,7 +67,7 @@ export const AdminOrdersPage = () => {
     return (
         <section className="space-y-6">
             <header>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-3xl font-black tracking-tight text-slate-950">
                     Pedidos
                 </h1>
 
@@ -115,7 +115,7 @@ export const AdminOrdersPage = () => {
             )}
 
             {isLoading ? (
-                <div className="flex min-h-64 items-center justify-center rounded-lg border border-gray-200 bg-white">
+                <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
                     <p className="text-sm font-medium text-gray-500">
                         Cargando pedidos...
                     </p>

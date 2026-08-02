@@ -25,7 +25,7 @@ export const CartPage = () => {
 
     if (isLoading) {
         return (
-            <section className="bg-slate-50 px-6 py-16">
+            <section className="min-h-[70vh] bg-slate-50 px-5 py-14 sm:px-6">
                 <div className="mx-auto max-w-7xl">
                     <p className="text-lg font-semibold text-slate-700">
                         Cargando carrito...
@@ -36,16 +36,14 @@ export const CartPage = () => {
     }
 
     return (
-        <section className="bg-slate-50 px-6 py-16">
+        <section className="min-h-[70vh] bg-gradient-to-b from-blue-50/70 via-slate-50 to-white px-5 py-12 sm:px-6 sm:py-16">
             <div className="mx-auto max-w-7xl">
                 <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
                     <div>
-                        <p className="text-sm font-black uppercase tracking-wide text-blue-600">
-                            Carrito
-                        </p>
+                        <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-600">Tu selección</p>
 
                         <h1 className="mt-2 text-4xl font-black text-slate-950">
-                            Tu Carrito de compras
+                            Carrito de compras
                         </h1>
                     </div>
 
@@ -54,7 +52,7 @@ export const CartPage = () => {
                             type="button"
                             disabled={isMutating}
                             onClick={clearCart}
-                            className="rounded-xl border border-red-200 px-5 py-3 text-sm font-bold text-red-600 hover:bg-red-50 disabled:opacity-50"
+                            className="min-h-12 rounded-xl border border-red-200 bg-white px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                         >
                             Vaciar carrito
                         </button>
@@ -62,7 +60,7 @@ export const CartPage = () => {
                 </div>
 
                 {error && (
-                    <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+                    <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
                         <p className="font-semibold text-red-600">{error}</p>
                     </div>
                 )}
