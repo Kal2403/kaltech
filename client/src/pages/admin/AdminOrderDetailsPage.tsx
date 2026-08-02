@@ -13,6 +13,7 @@ import type {
     PaymentMethod,
     PaymentStatus,
 } from "../../types/order.types";
+import { getAvailableOrderStatuses } from "../../utils/orderStatus";
 
 const orderStatusOptions: Array<{
     value: OrderStatus;
@@ -473,7 +474,11 @@ export const AdminOrderDetailsPage = () => {
                             }}
                             className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
                         >
-                            {orderStatusOptions.map(
+                            {orderStatusOptions
+                                .filter((option) =>
+                                    getAvailableOrderStatuses(order.orderStatus).includes(option.value)
+                                )
+                                .map(
                                 (option) => (
                                     <option
                                         key={option.value}

@@ -1,0 +1,45 @@
+name: Quality
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [client, server]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - if: github.event_name == 'pull_request'
+        working-directory: ${{ github.workspace }}
+        run: git diff --check "${{ github.event.pull_request.base.sha }}...HEAD"
+      - if: github.event_name == 'push'
+        working-directory: ${{ github.workspace }}
+        run: git diff --check HEAD^
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+      - run: npm ci
+      - if: matrix.project == 'client'
+        run: npm run lint
+      - if: matrix.project == 'server'
+        run: npm test
+      - run: npm run build

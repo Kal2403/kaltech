@@ -132,7 +132,11 @@ export const useAdminOrderDetails = (
     );
 
     useEffect(() => {
-        void reloadOrder();
+        const timeoutId = window.setTimeout(() => {
+            void reloadOrder();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [reloadOrder]);
 
     return {

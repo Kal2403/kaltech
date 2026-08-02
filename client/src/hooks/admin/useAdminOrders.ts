@@ -11,6 +11,7 @@ import {
 } from "../../services/order/order.service";
 import type {
     AdminOrder,
+    OrderPagination,
     OrderStatus,
 } from "../../types/order.types";
 
@@ -23,6 +24,8 @@ interface UseAdminOrdersReturn {
     isLoading: boolean;
     error: string | null;
     updatingOrderId: string | null;
+    pagination: OrderPagination;
+    goToPage: (page: number) => void;
     refreshOrders: () => Promise<void>;
     changeOrderStatus: (
         orderId: string,
@@ -58,6 +61,15 @@ export const useAdminOrders =
         const [error, setError] = useState<
             string | null
         >(null);
+        const [page, setPage] = useState(1);
+        const [pagination, setPagination] = useState<OrderPagination>({
+            page: 1,
+            limit: 20,
+            total: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPreviousPage: false,
+        });
         const [
             updatingOrderId,
             setUpdatingOrderId,
@@ -69,10 +81,10 @@ export const useAdminOrders =
                     setIsLoading(true);
                     setError(null);
 
-                    const ordersData =
-                        await getAdminOrders();
+                    const result = await getAdminOrders(page);
 
-                    setOrders(ordersData);
+                    setOrders(result.orders);
+                    setPagination(result.pagination);
                 } catch (error: unknown) {
                     setError(
                         getErrorMessage(
@@ -83,7 +95,7 @@ export const useAdminOrders =
                 } finally {
                     setIsLoading(false);
                 }
-            }, []);
+            }, [page]);
 
         const changeOrderStatus = useCallback(
             async (
@@ -131,7 +143,11 @@ export const useAdminOrders =
         );
 
         useEffect(() => {
-            void refreshOrders();
+            const timeoutId = window.setTimeout(() => {
+                void refreshOrders();
+            }, 0);
+
+            return () => window.clearTimeout(timeoutId);
         }, [refreshOrders]);
 
         return {
@@ -139,6 +155,8 @@ export const useAdminOrders =
             isLoading,
             error,
             updatingOrderId,
+            pagination,
+            goToPage: setPage,
             refreshOrders,
             changeOrderStatus,
         };

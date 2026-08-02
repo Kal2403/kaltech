@@ -85,9 +85,13 @@ export const CategoryForm = ({
         useState(Boolean(initialCategory));
 
     useEffect(() => {
-        setValues(getInitialValues(initialCategory));
-        setErrors({});
-        setIsSlugManuallyEdited(Boolean(initialCategory));
+        const timeoutId = window.setTimeout(() => {
+            setValues(getInitialValues(initialCategory));
+            setErrors({});
+            setIsSlugManuallyEdited(Boolean(initialCategory));
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [initialCategory]);
 
     const handleNameChange = (

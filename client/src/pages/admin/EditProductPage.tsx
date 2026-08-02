@@ -80,7 +80,11 @@ export const EditProductPage = () => {
     }, [productId]);
 
     useEffect(() => {
-        void loadProduct();
+        const timeoutId = window.setTimeout(() => {
+            void loadProduct();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [loadProduct]);
 
     const handleSubmit = async (

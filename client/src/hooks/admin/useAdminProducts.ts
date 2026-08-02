@@ -95,7 +95,11 @@ export const useAdminProducts = (): UseAdminProductsReturn => {
     );
 
     useEffect(() => {
-        void refreshProducts();
+        const timeoutId = window.setTimeout(() => {
+            void refreshProducts();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [refreshProducts]);
 
     return {
