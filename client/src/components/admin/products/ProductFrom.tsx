@@ -6,6 +6,10 @@ import {
 } from "react";
 
 import type { Category } from "../../../types/category.types";
+import {
+    getUploadErrorMessage,
+    uploadImage,
+} from "../../../services/uploads/upload.service";
 import type {
     CreateProductPayload,
     Product,
@@ -53,6 +57,14 @@ interface ProductFormProps {
     onCancel: () => void;
     onRetryCategories?: () => void;
 }
+
+const ACCEPTED_IMAGE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_FILES_PER_SELECTION = 5;
 
 const createSpecificationId = (): string => {
     return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -120,12 +132,17 @@ export const ProductForm = ({
     >(() => getInitialSpecifications(initialProduct));
 
     const [errors, setErrors] = useState<ProductFormErrors>({});
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [failedUploads, setFailedUploads] = useState<File[]>([]);
 
     useEffect(() => {
         const timeoutId = window.setTimeout(() => {
             setValues(getInitialValues(initialProduct));
             setSpecifications(getInitialSpecifications(initialProduct));
             setErrors({});
+            setUploadError(null);
+            setFailedUploads([]);
         }, 0);
 
         return () => window.clearTimeout(timeoutId);
@@ -158,6 +175,94 @@ export const ProductForm = ({
             ...currentValues,
             [name]: checked,
         }));
+    };
+
+    const validateImageFiles = (files: File[]): string | null => {
+        if (files.length > MAX_FILES_PER_SELECTION) {
+            return "Puedes seleccionar un máximo de 5 imágenes cada vez.";
+        }
+
+        if (files.some((file) => !ACCEPTED_IMAGE_TYPES.includes(file.type))) {
+            return "Solo se permiten imágenes JPEG, PNG o WebP.";
+        }
+
+        if (files.some((file) => file.size > MAX_IMAGE_SIZE)) {
+            return "Cada imagen debe pesar 5 MiB o menos.";
+        }
+
+        return null;
+    };
+
+    const uploadProductImages = async (files: File[]): Promise<void> => {
+        if (files.length === 0 || isUploading) {
+            return;
+        }
+
+        setIsUploading(true);
+        setUploadError(null);
+        setFailedUploads([]);
+
+        const uploadedUrls: string[] = [];
+        const failedFiles: File[] = [];
+        let lastError: unknown;
+
+        for (const file of files) {
+            try {
+                const uploadedImage = await uploadImage(file, "product");
+                uploadedUrls.push(uploadedImage.url);
+            } catch (error: unknown) {
+                failedFiles.push(file);
+                lastError = error;
+            }
+        }
+
+        if (uploadedUrls.length > 0) {
+            setValues((currentValues) => {
+                const images = Array.from(
+                    new Set([
+                        ...parseImages(currentValues.images),
+                        ...uploadedUrls,
+                    ])
+                );
+
+                return {
+                    ...currentValues,
+                    images: images.join("\n"),
+                };
+            });
+            setErrors((currentErrors) => ({
+                ...currentErrors,
+                images: undefined,
+            }));
+        }
+
+        if (failedFiles.length > 0) {
+            setFailedUploads(failedFiles);
+            setUploadError(
+                failedFiles.length === files.length
+                    ? getUploadErrorMessage(lastError)
+                    : `${failedFiles.length} imagen(es) no se pudieron subir.`
+            );
+        }
+
+        setIsUploading(false);
+    };
+
+    const handleImageFilesChange = (
+        event: ChangeEvent<HTMLInputElement>
+    ): void => {
+        const files = Array.from(event.target.files ?? []);
+        event.target.value = "";
+
+        const validationError = validateImageFiles(files);
+
+        if (validationError) {
+            setUploadError(validationError);
+            setFailedUploads([]);
+            return;
+        }
+
+        void uploadProductImages(files);
     };
 
     const handleAddSpecification = (): void => {
@@ -305,6 +410,10 @@ export const ProductForm = ({
         event: FormEvent<HTMLFormElement>
     ): Promise<void> => {
         event.preventDefault();
+
+        if (isUploading) {
+            return;
+        }
 
         if (!validateForm()) {
             return;
@@ -627,16 +736,70 @@ export const ProductForm = ({
                     rows={5}
                     value={values.images}
                     onChange={handleTextChange}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
+                    aria-invalid={Boolean(errors.images)}
+                    aria-describedby={errors.images ? "images-error" : undefined}
                     placeholder={"https://example.com/image-1.jpg\nhttps://example.com/image-2.jpg"}
                     className="w-full resize-y rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
                 />
 
                 {errors.images && (
-                    <p className="mt-2 text-sm text-red-600">
+                    <p id="images-error" className="mt-2 text-sm text-red-600">
                         {errors.images}
                     </p>
                 )}
+
+                <div className="mt-5">
+                    <label
+                        htmlFor="product-image-files"
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                    >
+                        Subir imágenes
+                    </label>
+
+                    <input
+                        id="product-image-files"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        onChange={handleImageFilesChange}
+                        disabled={isSubmitting || isUploading}
+                        aria-invalid={Boolean(uploadError)}
+                        aria-describedby={
+                            isUploading || uploadError
+                                ? "product-image-help product-image-upload-status"
+                                : "product-image-help"
+                        }
+                        className="block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:font-semibold file:text-blue-700 hover:file:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+
+                    <p id="product-image-help" className="mt-2 text-sm text-gray-500">
+                        Hasta 5 archivos JPEG, PNG o WebP de 5 MiB cada uno.
+                    </p>
+
+                    {isUploading && (
+                        <p id="product-image-upload-status" role="status" aria-live="polite" className="mt-2 text-sm font-medium text-blue-600">
+                            Subiendo imágenes...
+                        </p>
+                    )}
+
+                    {uploadError && (
+                        <div id="product-image-upload-status" className="mt-2 flex flex-wrap items-center gap-3" role="alert">
+                            <p className="text-sm text-red-600">{uploadError}</p>
+
+                            {failedUploads.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => void uploadProductImages(failedUploads)}
+                                    disabled={isSubmitting || isUploading}
+                                    className="text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Reintentar
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
             </section>
 
             <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -784,7 +947,7 @@ export const ProductForm = ({
                 <button
                     type="button"
                     onClick={onCancel}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                     className="rounded-md border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     Cancelar
@@ -794,12 +957,17 @@ export const ProductForm = ({
                     type="submit"
                     disabled={
                         isSubmitting ||
+                        isUploading ||
                         categoriesLoading ||
                         categories.length === 0
                     }
                     className="rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    {isSubmitting ? "Guardando..." : submitLabel}
+                    {isUploading
+                        ? "Subiendo imágenes..."
+                        : isSubmitting
+                          ? "Guardando..."
+                          : submitLabel}
                 </button>
             </div>
         </form>
