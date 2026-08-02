@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiError } from "../utils/ApiError";
+import { ApiError } from "../utils/ApiError.js";
+import multer from "multer";
 
 export const errorMiddleware = (
     error: Error,
@@ -14,6 +15,17 @@ export const errorMiddleware = (
         return res.status(error.statusCode).json({
             success: false,
             message: error.message,
+        });
+    }
+
+    if (error instanceof multer.MulterError) {
+        const isTooLarge = error.code === "LIMIT_FILE_SIZE";
+
+        return res.status(isTooLarge ? 413 : 400).json({
+            success: false,
+            message: isTooLarge
+                ? "Image must not exceed 5 MiB"
+                : "Invalid image upload request",
         });
     }
 
