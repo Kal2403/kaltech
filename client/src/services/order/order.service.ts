@@ -2,6 +2,7 @@ import { api } from "../../api/axios";
 
 import type {
     AdminOrder,
+    AdminOrdersResult,
     CreateOrderPayload,
     Order,
     UpdateOrderStatusPayload,
@@ -36,6 +37,7 @@ interface GetAdminOrdersResponse {
     message: string;
     data: {
         orders: AdminOrder[];
+        pagination: AdminOrdersResult["pagination"];
     };
 }
 
@@ -84,12 +86,16 @@ export const getOrderById = async (
     return data.data.order;
 };
 
-export const getAdminOrders = async (): Promise<AdminOrder[]> => {
+export const getAdminOrders = async (
+    page = 1,
+    limit = 20
+): Promise<AdminOrdersResult> => {
     const { data } = await api.get<GetAdminOrdersResponse>(
-        "/orders/admin"
+        "/orders/admin",
+        { params: { page, limit } }
     );
 
-    return data.data.orders;
+    return data.data;
 };
 
 export const getAdminOrderById = async (

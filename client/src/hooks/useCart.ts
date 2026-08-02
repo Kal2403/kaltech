@@ -85,7 +85,11 @@ export const useCart = () => {
     };
 
     useEffect(() => {
-        loadCart();
+        const timeoutId = window.setTimeout(() => {
+            void loadCart();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [loadCart]);
 
     const subTotal = useMemo(() => {

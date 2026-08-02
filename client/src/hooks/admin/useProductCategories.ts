@@ -61,7 +61,11 @@ export const useProductCategories =
         }, []);
 
         useEffect(() => {
-            void refreshCategories();
+            const timeoutId = window.setTimeout(() => {
+                void refreshCategories();
+            }, 0);
+
+            return () => window.clearTimeout(timeoutId);
         }, [refreshCategories]);
 
         return {

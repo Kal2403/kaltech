@@ -25,7 +25,11 @@ export const useOrders = () => {
     }, []);
 
     useEffect(() => {
-        void loadOrders();
+        const timeoutId = window.setTimeout(() => {
+            void loadOrders();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [loadOrders]);
 
     return {

@@ -9,28 +9,32 @@ export const useProductDetails = (productId?: string) => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!productId) {
-            setError("Producto no encontrado.");
-            setIsLoading(false);
-            return;
-        }
-
-        const loadProduct = async () => {
-            try {
-                setIsLoading(true);
-                setError("");
-
-                const productData = await getProductById(productId);
-
-                setProduct(productData);
-            } catch {
-                setError("No se pudo cargar el producto.");
-            } finally {
+        const timeoutId = window.setTimeout(() => {
+            if (!productId) {
+                setError("Producto no encontrado.");
                 setIsLoading(false);
+                return;
             }
-        };
 
-        loadProduct();
+            const loadProduct = async () => {
+                try {
+                    setIsLoading(true);
+                    setError("");
+
+                    const productData = await getProductById(productId);
+
+                    setProduct(productData);
+                } catch {
+                    setError("No se pudo cargar el producto.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            void loadProduct();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [productId]);
 
     return {

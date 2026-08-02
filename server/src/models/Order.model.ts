@@ -190,6 +190,7 @@ const orderSchema = new Schema<IOrder>(
 
 orderSchema.index({
     createdAt: -1,
+    _id: -1,
 });
 
 export const Order = mongoose.model<IOrder>(

@@ -6,27 +6,16 @@ import {
     type PaymentMethod,
 } from "../models/Order.model.js";
 import { Product } from "../models/Product.model.js";
+import {
+    canTransitionOrderStatus,
+    isOrderStatus,
+} from "../modules/orders/order-status.policy.js";
 import { ApiError } from "../utils/ApiError.js";
 
 interface CreateOrderInput {
     shippingAddress: IShippingAddress;
     paymentMethod: PaymentMethod;
 }
-
-const validOrderStatuses: OrderStatus[] = [
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-];
-
-const isOrderStatus = (value: unknown): value is OrderStatus => {
-    return (
-        typeof value === "string" &&
-        validOrderStatuses.includes(value as OrderStatus)
-    );
-};
 
 export const createOrder = async (
     userId: string,
@@ -132,14 +121,32 @@ export const getOrderById = async (
     return order;
 };
 
-export const getAdminOrders = async () => {
-    const orders = await Order.find()
-        .populate("user", "name email")
-        .sort({
-            createdAt: -1,
-        });
+export const getAdminOrders = async (
+    page: number,
+    limit: number
+) => {
+    const skip = (page - 1) * limit;
+    const [orders, total] = await Promise.all([
+        Order.find()
+            .populate("user", "name email")
+            .sort({ createdAt: -1, _id: -1 })
+            .skip(skip)
+            .limit(limit),
+        Order.countDocuments(),
+    ]);
+    const totalPages = Math.ceil(total / limit);
 
-    return orders;
+    return {
+        orders,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNextPage: page < totalPages,
+            hasPreviousPage: page > 1 && totalPages > 0,
+        },
+    };
 };
 
 export const getAdminOrderById = async (
@@ -173,11 +180,27 @@ export const updateOrderStatus = async (
         throw new ApiError(404, "Order not found");
     }
 
-    order.orderStatus = orderStatus;
+    if (!canTransitionOrderStatus(order.orderStatus, orderStatus)) {
+        throw new ApiError(409, "Invalid order status transition");
+    }
 
-    await order.save();
+    if (order.orderStatus === orderStatus) {
+        await order.populate("user", "name email");
+        return order;
+    }
 
-    await order.populate("user", "name email");
+    const updatedOrder = await Order.findOneAndUpdate(
+        { _id: orderId, orderStatus: order.orderStatus },
+        { $set: { orderStatus } },
+        { new: true, runValidators: true }
+    ).populate("user", "name email");
 
-    return order;
+    if (!updatedOrder) {
+        throw new ApiError(
+            409,
+            "Order status changed while the request was being processed"
+        );
+    }
+
+    return updatedOrder;
 };

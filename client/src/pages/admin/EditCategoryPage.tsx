@@ -76,7 +76,11 @@ export const EditCategoryPage = () => {
     }, [categoryId]);
 
     useEffect(() => {
-        void loadCategory();
+        const timeoutId = window.setTimeout(() => {
+            void loadCategory();
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [loadCategory]);
 
     const handleSubmit = async (

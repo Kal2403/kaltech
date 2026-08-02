@@ -122,9 +122,13 @@ export const ProductForm = ({
     const [errors, setErrors] = useState<ProductFormErrors>({});
 
     useEffect(() => {
-        setValues(getInitialValues(initialProduct));
-        setSpecifications(getInitialSpecifications(initialProduct));
-        setErrors({});
+        const timeoutId = window.setTimeout(() => {
+            setValues(getInitialValues(initialProduct));
+            setSpecifications(getInitialSpecifications(initialProduct));
+            setErrors({});
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [initialProduct]);
 
     const handleTextChange = (

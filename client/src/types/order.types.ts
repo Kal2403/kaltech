@@ -71,3 +71,17 @@ export interface AdminOrder
 export interface UpdateOrderStatusPayload {
     orderStatus: OrderStatus;
 }
+
+export interface OrderPagination {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+}
+
+export interface AdminOrdersResult {
+    orders: AdminOrder[];
+    pagination: OrderPagination;
+}

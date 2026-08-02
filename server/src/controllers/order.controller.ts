@@ -13,6 +13,8 @@ import {
     updateOrderStatus,
 } from "../services/order.service.js";
 import { ApiError } from "../utils/ApiError.js";
+import { parseAdminOrdersQuery } from "../modules/orders/order-query.js";
+import { validateObjectId } from "../utils/validateObjectId.js";
 
 const getOrderIdFromRequest = (req: Request): string => {
     const { id } = req.params;
@@ -21,7 +23,7 @@ const getOrderIdFromRequest = (req: Request): string => {
         throw new ApiError(400, "Invalid order ID");
     }
 
-    return id;
+    return validateObjectId(id, "order");
 };
 
 export const createOrderController = async (
@@ -93,18 +95,20 @@ export const getOrderByIdController = async (
 };
 
 export const getAdminOrdersController = async (
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const orders = await getAdminOrders();
+        const { page, limit } = parseAdminOrdersQuery(req.query);
+        const { orders, pagination } = await getAdminOrders(page, limit);
 
         res.status(200).json({
             success: true,
             message: "Admin orders retrieved successfully",
             data: {
                 orders,
+                pagination,
             },
         });
     } catch (error) {

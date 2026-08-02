@@ -22,6 +22,8 @@ export const AdminOrdersPage = () => {
         isLoading,
         error,
         updatingOrderId,
+        pagination,
+        goToPage,
         refreshOrders,
         changeOrderStatus,
     } = useAdminOrders();
@@ -141,8 +143,8 @@ export const AdminOrdersPage = () => {
                 <>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-sm text-gray-600">
-                            {orders.length}{" "}
-                            {orders.length === 1
+                            {pagination.total}{" "}
+                            {pagination.total === 1
                                 ? "pedido registrado"
                                 : "pedidos registrados"}
                         </p>
@@ -174,6 +176,19 @@ export const AdminOrdersPage = () => {
                             );
                         }}
                     />
+                    {pagination.totalPages > 1 && (
+                        <nav aria-label="Paginación de pedidos" className="flex items-center justify-between gap-4">
+                            <button type="button" disabled={!pagination.hasPreviousPage || isLoading} onClick={() => goToPage(pagination.page - 1)} className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50">
+                                Anterior
+                            </button>
+                            <p className="text-sm text-gray-600">
+                                Página {pagination.page} de {pagination.totalPages}
+                            </p>
+                            <button type="button" disabled={!pagination.hasNextPage || isLoading} onClick={() => goToPage(pagination.page + 1)} className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50">
+                                Siguiente
+                            </button>
+                        </nav>
+                    )}
                 </>
             )}
         </section>
