@@ -1,5 +1,5 @@
 import axios from "axios";
-import { storage } from "../utils/storage";
+import { notifySessionCleared, storage } from "../utils/storage";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,3 +19,16 @@ api.interceptors.request.use((config) => {
 
     return config;
 });
+
+api.interceptors.response.use(
+    (response) => response,
+    (error: unknown) => {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+            const hadToken = Boolean(storage.getToken());
+            storage.removeToken();
+            if (hadToken) notifySessionCleared();
+        }
+
+        return Promise.reject(error);
+    }
+);
