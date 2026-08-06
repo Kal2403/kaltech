@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 import { User } from "../models/User.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -38,11 +38,16 @@ export const protect = async (
 
         req.user = {
             id: user.id,
+            name: user.name,
+            email: user.email,
             role: user.role,
         };
 
         next();
     } catch (error) {
+        if (error instanceof TokenExpiredError || error instanceof JsonWebTokenError) {
+            return next(new ApiError(401, "Not authorized, token invalid or expired"));
+        }
         next(error);
     }
 };
