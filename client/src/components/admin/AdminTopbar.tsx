@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
-import { FiExternalLink, FiMenu, FiUser } from "react-icons/fi";
+import { FiExternalLink, FiLogOut, FiMenu, FiUser } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../routes/paths";
 
 interface AdminTopbarProps {
@@ -8,6 +9,13 @@ interface AdminTopbarProps {
 }
 
 export const AdminTopbar = ({ onOpenNavigation }: AdminTopbarProps) => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        logout();
+        navigate(ROUTES.home, { replace: true });
+    };
+
     return (
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur lg:px-10">
             <div className="flex items-center justify-between gap-4">
@@ -21,13 +29,12 @@ export const AdminTopbar = ({ onOpenNavigation }: AdminTopbarProps) => {
                         <FiMenu aria-hidden="true" />
                     </button>
                     <div className="min-w-0">
-                    <p className="text-sm font-bold uppercase tracking-wide text-blue-600">
-                        Administración
-                    </p>
-
-                    <h1 className="text-xl font-black text-slate-950">
-                        Panel KalTech
-                    </h1>
+                        <p className="text-sm font-bold uppercase tracking-wide text-blue-600">
+                            Administración
+                        </p>
+                        <h1 className="text-xl font-black text-slate-950">
+                            Panel KalTech
+                        </h1>
                     </div>
                 </div>
 
@@ -36,27 +43,30 @@ export const AdminTopbar = ({ onOpenNavigation }: AdminTopbarProps) => {
                         to={ROUTES.home}
                         className="hidden items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 sm:flex"
                     >
-                        <FiExternalLink />
+                        <FiExternalLink aria-hidden="true" />
                         Ver tienda
                     </Link>
-
-                    <div
-                        className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2 transition hover:border-blue-200 hover:bg-blue-50"
-                    >
+                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-3 py-2">
                         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
-                            <FiUser />
+                            <FiUser aria-hidden="true" />
                         </span>
-
-                        <span className="hidden text-left sm:block">
-                            <span className="block text-sm font-black text-slate-950">
-                                Administrador
+                        <span className="hidden min-w-0 text-left sm:block">
+                            <span className="block max-w-44 truncate text-sm font-black text-slate-950">
+                                {user?.name ?? "Administrador"}
                             </span>
-
-                            <span className="block text-xs text-slate-500">
-                                admin
+                            <span className="block max-w-44 truncate text-xs text-slate-500">
+                                {user?.email ?? "admin"}
                             </span>
                         </span>
                     </div>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-lg text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+                        aria-label="Cerrar sesión"
+                    >
+                        <FiLogOut aria-hidden="true" />
+                    </button>
                 </div>
             </div>
         </header>

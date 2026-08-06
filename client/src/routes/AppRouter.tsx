@@ -26,6 +26,9 @@ import { CreateProductPage } from "../pages/admin/CreateProductPage";
 import { DashboardPage } from "../pages/admin/DashboardPage";
 import { EditCategoryPage } from "../pages/admin/EditCategoryPage";
 import { EditProductPage } from "../pages/admin/EditProductPage";
+import { AdminRoute } from "./AdminRoute";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PublicOnlyRoute } from "./PublicOnlyRoute";
 
 const router = createBrowserRouter([
     {
@@ -46,71 +49,41 @@ const router = createBrowserRouter([
                 element: <ProductDetailsPage />,
             },
             {
-                path: "cart",
-                element: <CartPage />,
+                element: <ProtectedRoute />,
+                children: [
+                    { path: "cart", element: <CartPage /> },
+                    { path: "checkout", element: <CheckoutPage /> },
+                    { path: "orders", element: <OrdersPage /> },
+                    { path: "orders/:id", element: <OrderDetailsPage /> },
+                ],
             },
             {
-                path: "checkout",
-                element: <CheckoutPage />,
-            },
-            {
-                path: "orders",
-                element: <OrdersPage />,
-            },
-            {
-                path: "orders/:id",
-                element: <OrderDetailsPage />,
-            },
-            {
-                path: "login",
-                element: <LoginPage />,
-            },
-            {
-                path: "register",
-                element: <RegisterPage />,
+                element: <PublicOnlyRoute />,
+                children: [
+                    { path: "login", element: <LoginPage /> },
+                    { path: "register", element: <RegisterPage /> },
+                ],
             },
         ],
     },
     {
         path: "/admin",
-        element: <AdminLayout />,
+        element: <AdminRoute />,
         errorElement: <NotFoundPage />,
         children: [
             {
-                index: true,
-                element: <DashboardPage />,
-            },
-            {
-                path: "products",
-                element: <AdminProductsPage />,
-            },
-            {
-                path: "products/new",
-                element: <CreateProductPage />,
-            },
-            {
-                path: "products/:id/edit",
-                element: <EditProductPage />,
-            },
-            {
-                path: "categories",
-                element: <AdminCategoriesPage />,
-            },
-            {
-                path: "categories/new",
-                element: <CreateCategoryPage />,
-            },
-            {
-                path: "categories/:id/edit",
-                element: <EditCategoryPage />,
-            },
-            {
-                path: "orders",
-                element: <AdminOrdersPage />,
-            },
-            {
-                path: "orders/:id",
-                element: <AdminOrderDetailsPage />,
+                element: <AdminLayout />,
+                children: [
+                    { index: true, element: <DashboardPage /> },
+                    { path: "products", element: <AdminProductsPage /> },
+                    { path: "products/new", element: <CreateProductPage /> },
+                    { path: "products/:id/edit", element: <EditProductPage /> },
+                    { path: "categories", element: <AdminCategoriesPage /> },
+                    { path: "categories/new", element: <CreateCategoryPage /> },
+                    { path: "categories/:id/edit", element: <EditCategoryPage /> },
+                    { path: "orders", element: <AdminOrdersPage /> },
+                    { path: "orders/:id", element: <AdminOrderDetailsPage /> },
+                ],
             },
         ],
     },
