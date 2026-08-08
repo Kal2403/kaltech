@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
     FiBox,
@@ -40,6 +40,17 @@ interface AdminSidebarProps {
 }
 
 export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
+    const [isDesktop, setIsDesktop] = useState(() =>
+        window.matchMedia("(min-width: 1024px)").matches
+    );
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
+        const handleChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches);
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, []);
+
     useEffect(() => {
         if (!isOpen) return;
         const closeOnEscape = (event: KeyboardEvent) => {
@@ -52,7 +63,7 @@ export const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
     return (
         <>
         {isOpen && <button type="button" aria-label="Cerrar navegación administrativa" onClick={onClose} className="fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm lg:hidden" />}
-        <aside className={`fixed inset-y-0 left-0 z-50 w-72 border-r border-white/10 bg-[#03101f] px-6 py-7 shadow-2xl transition-transform lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <aside id="admin-navigation" aria-label="Navegación administrativa" aria-hidden={!isOpen && !isDesktop} inert={!isOpen && !isDesktop} className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[calc(100vw-2rem)] border-r border-white/10 bg-[#03101f] px-6 py-7 shadow-2xl transition-transform lg:max-w-none lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
             <div className="flex h-full flex-col">
                 <div className="flex items-center justify-between">
                 <NavLink

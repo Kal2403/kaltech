@@ -18,7 +18,8 @@ export const CheckoutPage = () => {
     if (isLoading) {
         return (
             <section className="min-h-[70vh] bg-slate-50 px-5 py-14 sm:px-6">
-                <div className="mx-auto max-w-7xl">
+                <div role="status" aria-busy="true" className="mx-auto flex min-h-64 max-w-7xl items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <span aria-hidden="true" className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
                     <p className="text-lg font-semibold text-slate-700">
                         Cargando checkout...
                     </p>

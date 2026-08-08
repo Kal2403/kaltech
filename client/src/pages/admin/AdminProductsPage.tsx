@@ -118,7 +118,7 @@ export const AdminProductsPage = () => {
                         type="button"
                         onClick={() => setSuccessMessage(null)}
                         aria-label="Cerrar mensaje"
-                        className="font-semibold text-green-700 transition-colors hover:text-green-900"
+                        className="min-h-11 rounded-md px-3 font-semibold text-green-700 transition-colors hover:bg-green-100 hover:text-green-900"
                     >
                         Cerrar
                     </button>
@@ -135,7 +135,7 @@ export const AdminProductsPage = () => {
                     <button
                         type="button"
                         onClick={() => void handleRefresh()}
-                        className="self-start rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 sm:self-auto"
+                        className="min-h-11 self-start rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 sm:self-auto"
                     >
                         Reintentar
                     </button>
@@ -143,7 +143,7 @@ export const AdminProductsPage = () => {
             )}
 
             {isLoading ? (
-                <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
+                <div role="status" className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
                     <p className="text-sm font-medium text-gray-500">
                         Cargando productos...
                     </p>
@@ -162,7 +162,7 @@ export const AdminProductsPage = () => {
                     <button
                         type="button"
                         onClick={handleCreateProduct}
-                        className="mt-5 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                        className="mt-5 min-h-11 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
                     >
                         Crear primer producto
                     </button>

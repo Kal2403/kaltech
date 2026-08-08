@@ -88,7 +88,7 @@ export const AdminOrdersPage = () => {
                         type="button"
                         onClick={() => setSuccessMessage(null)}
                         aria-label="Cerrar mensaje"
-                        className="font-semibold text-green-700 transition-colors hover:text-green-900"
+                        className="min-h-11 rounded-md px-3 font-semibold text-green-700 transition-colors hover:bg-green-100 hover:text-green-900"
                     >
                         Cerrar
                     </button>
@@ -107,7 +107,7 @@ export const AdminOrdersPage = () => {
                     <button
                         type="button"
                         onClick={() => void handleRefresh()}
-                        className="self-start rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 sm:self-auto"
+                        className="min-h-11 self-start rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 sm:self-auto"
                     >
                         Reintentar
                     </button>
@@ -115,7 +115,7 @@ export const AdminOrdersPage = () => {
             )}
 
             {isLoading ? (
-                <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
+                <div role="status" className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm" aria-busy="true">
                     <p className="text-sm font-medium text-gray-500">
                         Cargando pedidos...
                     </p>
@@ -177,14 +177,14 @@ export const AdminOrdersPage = () => {
                         }}
                     />
                     {pagination.totalPages > 1 && (
-                        <nav aria-label="Paginación de pedidos" className="flex items-center justify-between gap-4">
-                            <button type="button" disabled={!pagination.hasPreviousPage || isLoading} onClick={() => goToPage(pagination.page - 1)} className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50">
+                        <nav aria-label="Paginación de pedidos" className="flex flex-wrap items-center justify-between gap-3">
+                            <button type="button" disabled={!pagination.hasPreviousPage || isLoading} onClick={() => goToPage(pagination.page - 1)} className="min-h-11 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50">
                                 Anterior
                             </button>
-                            <p className="text-sm text-gray-600">
+                            <p className="order-first w-full text-center text-sm text-gray-600 sm:order-none sm:w-auto">
                                 Página {pagination.page} de {pagination.totalPages}
                             </p>
-                            <button type="button" disabled={!pagination.hasNextPage || isLoading} onClick={() => goToPage(pagination.page + 1)} className="rounded-md border border-gray-300 px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50">
+                            <button type="button" disabled={!pagination.hasNextPage || isLoading} onClick={() => goToPage(pagination.page + 1)} className="min-h-11 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50">
                                 Siguiente
                             </button>
                         </nav>

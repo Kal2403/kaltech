@@ -26,7 +26,8 @@ export const CartPage = () => {
     if (isLoading) {
         return (
             <section className="min-h-[70vh] bg-slate-50 px-5 py-14 sm:px-6">
-                <div className="mx-auto max-w-7xl">
+                <div role="status" aria-busy="true" className="mx-auto flex min-h-64 max-w-7xl items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <span aria-hidden="true" className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
                     <p className="text-lg font-semibold text-slate-700">
                         Cargando carrito...
                     </p>
@@ -52,7 +53,7 @@ export const CartPage = () => {
                             type="button"
                             disabled={isMutating}
                             onClick={clearCart}
-                            className="min-h-12 rounded-xl border border-red-200 bg-white px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                            className="min-h-12 rounded-xl border border-red-200 bg-white px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             Vaciar carrito
                         </button>
