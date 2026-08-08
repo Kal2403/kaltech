@@ -37,6 +37,7 @@ export const Navbar = () => {
         const previousOverflow = document.body.style.overflow;
         const menuButton = menuButtonRef.current;
         document.body.style.overflow = "hidden";
+
         return () => {
             window.removeEventListener("keydown", closeOnEscape);
             document.body.style.overflow = previousOverflow;
@@ -51,21 +52,21 @@ export const Navbar = () => {
     };
 
     return (
-        <header className="sticky top-0 z-50 border-b border-slate-200/90 bg-white/95 backdrop-blur-xl">
+        <header className="sticky top-0 z-50 bg-slate-50/95 px-3 pt-3 backdrop-blur-xl sm:px-5 sm:pt-4">
             <nav
-                className="mx-auto flex h-18 max-w-7xl items-center gap-5 px-4 sm:px-6 lg:h-21 lg:px-8"
+                className="mx-auto flex h-17 max-w-360 items-center rounded-2xl border border-slate-200/80 bg-white px-4 shadow-[0_12px_35px_-24px_rgba(15,23,42,0.35)] sm:h-20 sm:px-6 lg:h-24 lg:px-8"
                 aria-label="Navegación principal"
             >
                 <Link
                     to={ROUTES.home}
-                    className="shrink-0 text-2xl font-black tracking-[-0.045em] sm:text-3xl"
+                    className="shrink-0 text-[1.65rem] font-black tracking-[-0.055em] sm:text-3xl xl:text-[2rem]"
                     aria-label="KalTech, inicio"
                 >
                     <span className="text-blue-600">KAL</span>
                     <span className="text-[#071225]">TECH</span>
                 </Link>
 
-                <div className="ml-8 hidden h-full items-center gap-8 lg:flex">
+                <div className="ml-9 hidden h-full items-center gap-7 lg:flex xl:ml-12 xl:gap-10">
                     {links.map((link) => (
                         <NavLink
                             key={link.path}
@@ -74,7 +75,7 @@ export const Navbar = () => {
                             className={({ isActive }) =>
                                 `relative flex h-full items-center text-sm font-extrabold transition-colors ${
                                     isActive
-                                        ? "text-blue-600 after:absolute after:inset-x-0 after:bottom-0 after:h-0.75 after:rounded-full after:bg-blue-600"
+                                        ? "text-blue-600 after:absolute after:inset-x-0 after:bottom-0 after:h-1 after:rounded-t-full after:bg-blue-600"
                                         : "text-slate-700 hover:text-blue-600"
                                 }`
                             }
@@ -88,22 +89,30 @@ export const Navbar = () => {
                     {user ? (
                         <Link
                             to={ROUTES.cart}
-                            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-900 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                            className="relative flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-slate-900 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 sm:px-4"
                             aria-label="Ver carrito"
                         >
-                            <FiShoppingCart aria-hidden="true" />
+                            <FiShoppingCart className="text-xl" aria-hidden="true" />
+                            <span className="hidden text-sm font-extrabold xl:inline">Carrito</span>
                         </Link>
                     ) : null}
-                    {user ? <span className="hidden max-w-36 truncate text-sm font-bold text-slate-700 xl:block">{user.name}</span> : null}
+
+                    {user ? (
+                        <span className="hidden max-w-32 truncate text-sm font-bold text-slate-700 2xl:block">
+                            {user.name}
+                        </span>
+                    ) : null}
+
                     {!user ? (
                         <Link
                             to={ROUTES.login}
-                            className="hidden h-11 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 sm:flex"
+                            className="hidden h-11 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 sm:flex lg:h-12 lg:px-6"
                         >
                             <FiUser aria-hidden="true" />
                             Acceder
                         </Link>
                     ) : null}
+
                     {user?.role === "admin" ? (
                         <Link
                             to={ROUTES.admin}
@@ -113,6 +122,7 @@ export const Navbar = () => {
                             Panel
                         </Link>
                     ) : null}
+
                     {user ? (
                         <button
                             type="button"
@@ -124,20 +134,17 @@ export const Navbar = () => {
                             Salir
                         </button>
                     ) : null}
+
                     <button
                         ref={menuButtonRef}
                         type="button"
                         aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
                         aria-expanded={isOpen}
                         aria-controls="mobile-navigation"
-                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-2xl text-slate-900 lg:hidden"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-2xl text-slate-900 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 lg:hidden"
                         onClick={() => setIsOpen((open) => !open)}
                     >
-                        {isOpen ? (
-                            <FiX aria-hidden="true" />
-                        ) : (
-                            <FiMenu aria-hidden="true" />
-                        )}
+                        {isOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
                     </button>
                 </div>
             </nav>
@@ -145,10 +152,10 @@ export const Navbar = () => {
             {isOpen ? (
                 <nav
                     id="mobile-navigation"
-                    className="border-t border-slate-200 bg-white px-4 py-4 shadow-xl lg:hidden"
+                    className="mx-auto mt-2 max-w-360 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-xl lg:hidden"
                     aria-label="Navegación móvil"
                 >
-                    <div className="mx-auto flex max-w-7xl flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                         {links.map((link) => (
                             <NavLink
                                 key={link.path}

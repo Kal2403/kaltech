@@ -1,14 +1,17 @@
 import { FiExternalLink, FiLogOut, FiMenu, FiUser } from "react-icons/fi";
+import type { RefObject } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../routes/paths";
 
 interface AdminTopbarProps {
+    navigationTriggerRef: RefObject<HTMLButtonElement | null>;
+    isNavigationOpen: boolean;
     onOpenNavigation: () => void;
 }
 
-export const AdminTopbar = ({ onOpenNavigation }: AdminTopbarProps) => {
+export const AdminTopbar = ({ navigationTriggerRef, isNavigationOpen, onOpenNavigation }: AdminTopbarProps) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const handleLogout = () => {
@@ -17,12 +20,15 @@ export const AdminTopbar = ({ onOpenNavigation }: AdminTopbarProps) => {
     };
 
     return (
-        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur lg:px-10">
+        <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-10">
             <div className="flex items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                     <button
+                        ref={navigationTriggerRef}
                         type="button"
                         onClick={onOpenNavigation}
+                        aria-controls="admin-navigation"
+                        aria-expanded={isNavigationOpen}
                         aria-label="Abrir navegación administrativa"
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-xl text-slate-800 lg:hidden"
                     >
