@@ -11,7 +11,7 @@ const categories = [
 ];
 
 export const CategoriesSection = () => (
-    <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+    <section id="categories" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
                 <div>
