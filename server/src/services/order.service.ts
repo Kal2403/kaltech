@@ -1,9 +1,8 @@
+import mongoose from "mongoose";
 import { Cart } from "../models/Cart.model.js";
 import {
     Order,
-    type IShippingAddress,
-    type OrderStatus,
-    type PaymentMethod,
+    type IOrderItem,
 } from "../models/Order.model.js";
 import { Product } from "../models/Product.model.js";
 import {
@@ -11,87 +10,104 @@ import {
     isOrderStatus,
 } from "../modules/orders/order-status.policy.js";
 import { ApiError } from "../utils/ApiError.js";
-
-interface CreateOrderInput {
-    shippingAddress: IShippingAddress;
-    paymentMethod: PaymentMethod;
-}
+import { parseCreateOrderInput } from "../modules/orders/order-input.js";
 
 export const createOrder = async (
     userId: string,
-    data: CreateOrderInput
+    data: unknown
 ) => {
-    const cart = await Cart.findOne({
-        user: userId,
-    }).populate("items.product");
+    const input = parseCreateOrderInput(data);
+    return mongoose.connection.transaction(async (session) => {
+        const cart = await Cart.findOne({
+            user: userId,
+        }).session(session);
 
-    if (!cart || cart.items.length === 0) {
-        throw new ApiError(400, "Cart is empty");
-    }
-
-    let subtotal = 0;
-
-    const orderItems = [];
-
-    for (const item of cart.items) {
-        const product = item.product as any;
-
-        if (!product?.isActive) {
-            throw new ApiError(
-                400,
-                `${product?.name ?? "Product"} is no longer available`
-            );
+        if (!cart || cart.items.length === 0) {
+            throw new ApiError(400, "Cart is empty");
         }
 
-        if (product.stock < item.quantity) {
-            throw new ApiError(
-                400,
-                `Not enough stock for ${product.name}`
-            );
+        let subtotal = 0;
+
+        const orderItems: IOrderItem[] = [];
+
+        for (const item of cart.items) {
+            if (!Number.isSafeInteger(item.quantity) || item.quantity <= 0) {
+                throw new ApiError(400, "Invalid cart quantity");
+            }
+            const product = await Product.findById(item.product).session(session);
+
+            if (!product?.isActive) {
+                throw new ApiError(
+                    400,
+                    `${product?.name ?? "Product"} is no longer available`
+                );
+            }
+
+            if (!Number.isSafeInteger(product.stock) || product.stock < item.quantity) {
+                throw new ApiError(
+                    400,
+                    `Not enough stock for ${product.name}`
+                );
+            }
+
+            const finalPrice =
+                product.discountPrice ?? product.price;
+
+            if (!Number.isFinite(finalPrice) || finalPrice < 0) {
+                throw new ApiError(400, "Invalid product price");
+            }
+
+            subtotal += finalPrice * item.quantity;
+
+            orderItems.push({
+                product: product._id,
+                name: product.name,
+                quantity: item.quantity,
+                price: finalPrice,
+                image: product.images?.[0],
+            });
         }
 
-        const finalPrice =
-            product.discountPrice ?? product.price;
+        const tax = Number((subtotal * 0.18).toFixed(2));
+        const shippingCost = subtotal > 1000 ? 0 : 25;
+        const total = Number(
+            (subtotal + tax + shippingCost).toFixed(2)
+        );
 
-        subtotal += finalPrice * item.quantity;
-
-        orderItems.push({
-            product: product._id,
-            name: product.name,
-            quantity: item.quantity,
-            price: finalPrice,
-            image: product.images?.[0],
+        if (![subtotal, tax, total].every(Number.isFinite)) {
+            throw new ApiError(400, "Invalid order total");
+        }
+        const order = new Order({
+            user: userId,
+            items: orderItems,
+            shippingAddress: input.shippingAddress,
+            paymentMethod: input.paymentMethod,
+            subtotal,
+            tax,
+            shippingCost,
+            total,
         });
+        await order.validate();
 
-        product.stock -= item.quantity;
+        // All writes share the session so any failure rolls back the entire checkout.
+        for (const item of orderItems) {
+            const result = await Product.updateOne(
+                { _id: item.product, isActive: true, stock: { $gte: item.quantity } },
+                { $inc: { stock: -item.quantity } },
+                { session }
+            );
+            if (result.matchedCount !== 1) {
+                throw new ApiError(409, "Product availability changed; please retry checkout");
+            }
+        }
+        await order.save({ session });
 
-        await Product.findByIdAndUpdate(product._id, {
-            stock: product.stock,
-        });
-    }
+        cart.items = [];
 
-    const tax = Number((subtotal * 0.18).toFixed(2));
-    const shippingCost = subtotal > 1000 ? 0 : 25;
-    const total = Number(
-        (subtotal + tax + shippingCost).toFixed(2)
-    );
+        await cart.save({ session });
 
-    const order = await Order.create({
-        user: userId,
-        items: orderItems,
-        shippingAddress: data.shippingAddress,
-        paymentMethod: data.paymentMethod,
-        subtotal,
-        tax,
-        shippingCost,
-        total,
+        return order;
     });
-
-    cart.items = [];
-
-    await cart.save();
-
-    return order;
 };
 
 export const getMyOrders = async (userId: string) => {
