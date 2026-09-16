@@ -33,6 +33,9 @@ const classifyError = (error: unknown) => {
         if (error instanceof mongoose.Error.CastError) {
             return { statusCode: 400, message: "Invalid request value", category: "cast" };
         }
+        if (error instanceof mongoose.Error.VersionError) {
+            return { statusCode: 409, message: "Resource changed; please reload and retry", category: "version_conflict" };
+        }
         if ("code" in error && error.code === 11000) {
             return { statusCode: 409, message: "Resource already exists", category: "duplicate_key" };
         }

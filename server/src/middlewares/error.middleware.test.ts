@@ -6,10 +6,12 @@ import { test } from "node:test";
 
 import { errorMiddleware } from "./error.middleware.js";
 import { ApiError } from "../utils/ApiError.js";
+import { Cart } from "../models/Cart.model.js";
 
 const secret = "private-password-token-database-value";
 
 const cases = [
+    { name: "concurrent updates", error: new mongoose.Error.VersionError(new Cart(), 1, [secret]), status: 409, message: "Resource changed; please reload and retry", category: "version_conflict" },
     { name: "controlled errors", error: new ApiError(403, "Access denied"), status: 403, message: "Access denied", category: "operational" },
     { name: "large uploads", error: new multer.MulterError("LIMIT_FILE_SIZE", secret), status: 413, message: "Image must not exceed 5 MiB", category: "upload" },
     { name: "invalid uploads", error: new multer.MulterError("LIMIT_UNEXPECTED_FILE", secret), status: 400, message: "Invalid image upload request", category: "upload" },
