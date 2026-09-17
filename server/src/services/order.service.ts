@@ -190,33 +190,61 @@ export const updateOrderStatus = async (
         );
     }
 
-    const order = await Order.findById(orderId);
+    return mongoose.connection.transaction(async (session) => {
+        const order = await Order.findById(orderId).session(session);
 
-    if (!order) {
-        throw new ApiError(404, "Order not found");
-    }
+        if (!order) {
+            throw new ApiError(404, "Order not found");
+        }
 
-    if (!canTransitionOrderStatus(order.orderStatus, orderStatus)) {
-        throw new ApiError(409, "Invalid order status transition");
-    }
+        if (!canTransitionOrderStatus(order.orderStatus, orderStatus)) {
+            throw new ApiError(409, "Invalid order status transition");
+        }
 
-    if (order.orderStatus === orderStatus) {
-        await order.populate("user", "name email");
-        return order;
-    }
+        // A retry of a committed cancellation must never restore stock twice.
+        if (order.orderStatus === orderStatus) {
+            await order.populate({ path: "user", select: "name email", options: { session } });
+            return order;
+        }
 
-    const updatedOrder = await Order.findOneAndUpdate(
-        { _id: orderId, orderStatus: order.orderStatus },
-        { $set: { orderStatus } },
-        { new: true, runValidators: true }
-    ).populate("user", "name email");
+        if (orderStatus === "cancelled" && (
+            order.items.length === 0 ||
+            order.items.some((item) => !Number.isSafeInteger(item.quantity) || item.quantity <= 0)
+        )) {
+            throw new ApiError(409, "Order quantities must be corrected before cancellation");
+        }
 
-    if (!updatedOrder) {
-        throw new ApiError(
-            409,
-            "Order status changed while the request was being processed"
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId, orderStatus: order.orderStatus },
+            { $set: { orderStatus } },
+            { returnDocument: "after", runValidators: true, session }
         );
-    }
 
-    return updatedOrder;
+        if (!updatedOrder) {
+            throw new ApiError(409, "Order status changed while the request was being processed");
+        }
+
+        if (orderStatus === "cancelled") {
+            for (const item of order.items) {
+                const product = await Product.findById(item.product).session(session);
+                if (!product || !Number.isSafeInteger(product.stock) || product.stock < 0 ||
+                    product.stock > Number.MAX_SAFE_INTEGER - item.quantity) {
+                    throw new ApiError(409, "Product inventory must be corrected before cancellation");
+                }
+
+                // Inactive products still own inventory; restoring it does not reactivate them.
+                const result = await Product.updateOne(
+                    { _id: product._id, stock: product.stock },
+                    { $inc: { stock: item.quantity } },
+                    { session }
+                );
+                if (result.matchedCount !== 1) {
+                    throw new ApiError(409, "Product inventory changed during cancellation");
+                }
+            }
+        }
+
+        await updatedOrder.populate({ path: "user", select: "name email", options: { session } });
+        return updatedOrder;
+    });
 };
