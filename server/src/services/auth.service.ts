@@ -39,8 +39,8 @@ const parseRegisterInput = (input: unknown): RegisterInput => {
         throw new ApiError(400, "A valid email is required");
     }
 
-    if (password.length < 8 || password.length > 128) {
-        throw new ApiError(400, "Password must be between 8 and 128 characters");
+    if (password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
+        throw new ApiError(400, "Password must contain at least 8 characters and at most 72 UTF-8 bytes");
     }
 
     return { name, email, password };
@@ -58,7 +58,7 @@ const parseLoginInput = (input: unknown): LoginInput => {
         !emailPattern.test(email) ||
         email.length > 254 ||
         password.length === 0 ||
-        password.length > 128
+        Buffer.byteLength(password, "utf8") > 72
     ) {
         throw new ApiError(400, "A valid email and password are required");
     }

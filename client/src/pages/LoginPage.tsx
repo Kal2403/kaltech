@@ -30,6 +30,7 @@ export const LoginPage = () => {
         const nextErrors: { email?: string; password?: string } = {};
         if (!/^\S+@\S+\.\S+$/.test(email.trim())) nextErrors.email = "Ingresa un correo electrónico válido.";
         if (password.length < 8) nextErrors.password = "La contraseña debe tener al menos 8 caracteres.";
+        else if (new TextEncoder().encode(password).length > 72) nextErrors.password = "La contraseña es demasiado larga. Usa menos caracteres.";
         setFieldErrors(nextErrors);
         if (Object.keys(nextErrors).length > 0) return;
 
