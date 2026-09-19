@@ -26,7 +26,7 @@ export const ProductDetailsPage = () => {
                         <img src={product.images[0] ?? fallbackImage} alt={product.name} className="max-h-[30rem] h-full w-full object-contain" />
                     </div>
                     <div className="flex flex-col py-2">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">{product.category?.name ?? "Tecnología"}</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-600">{product.category?.name ?? "Sin categoría"}</p>
                         <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{product.name}</h1>
                         {product.brand && <p className="mt-3 text-slate-500">Marca: <span className="font-bold text-blue-600">{product.brand}</span></p>}
                         <p className="mt-6 text-base leading-7 text-slate-600 sm:text-lg">{product.description}</p>

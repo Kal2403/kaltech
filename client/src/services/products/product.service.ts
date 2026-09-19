@@ -39,6 +39,16 @@ export const getProductById = async (id: string): Promise<Product> => {
     return response.data.data.product;
 };
 
+export const getAdminProducts = async (): Promise<Product[]> => {
+    const response = await api.get<ProductsResponse>("/products/admin");
+    return response.data.data.products;
+};
+
+export const getAdminProductById = async (id: string): Promise<Product> => {
+    const response = await api.get<ProductResponse>(`/products/admin/${id}`);
+    return response.data.data.product;
+};
+
 export const createProduct = async (
     payload: CreateProductPayload
 ): Promise<Product> => {

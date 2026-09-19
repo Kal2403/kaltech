@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { ProductForm } from "../../components/admin/products/ProductFrom";
+import { ProductForm } from "../../components/admin/products";
 import { useProductCategories } from "../../hooks/admin/useProductCategories";
 import { useProductMutation } from "../../hooks/admin/useProductMutation";
 import { ROUTES } from "../../routes/paths";
-import { getProductById } from "../../services/products/product.service";
+import { getAdminProductById } from "../../services/products/product.service";
 import type {
     CreateProductPayload,
     Product,
@@ -64,7 +64,7 @@ export const EditProductPage = () => {
             setIsLoadingProduct(true);
             setProductError(null);
 
-            const productData = await getProductById(productId);
+            const productData = await getAdminProductById(productId);
 
             setProduct(productData);
         } catch (error: unknown) {

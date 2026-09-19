@@ -111,7 +111,7 @@ export const AdminProductTable = ({
                                     </td>
 
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                                        {product.category.name}
+                                        {product.category?.name ?? "Sin categoría"}
                                     </td>
 
                                     <td className="whitespace-nowrap px-6 py-4">

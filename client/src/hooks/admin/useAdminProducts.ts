@@ -3,7 +3,7 @@ import axios from "axios";
 
 import {
     deleteProduct as deleteProductRequest,
-    getProducts,
+    getAdminProducts,
 } from "../../services/products/product.service";
 import type { Product } from "../../types/product.types";
 
@@ -48,7 +48,7 @@ export const useAdminProducts = (): UseAdminProductsReturn => {
             setIsLoading(true);
             setError(null);
 
-            const productsData = await getProducts();
+            const productsData = await getAdminProducts();
 
             setProducts(productsData);
         } catch (error: unknown) {

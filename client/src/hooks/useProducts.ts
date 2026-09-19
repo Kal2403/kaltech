@@ -1,15 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { getProducts } from "../services/products/product.service";
 import type { Product } from "../types/product.types";
 import type { SortOption } from "../components/products/ProductSort";
 
 export const useProducts = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const search = searchParams.get("search") ?? "";
     const [products, setProducts] = useState<Product[]>([]);
-    const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortOption>("featured");
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const handleSearchChange = useCallback(
+        (newSearch: string) => {
+            setSearchParams(
+                (prev) => {
+                    const next = new URLSearchParams(prev);
+                    const trimmed = newSearch.trim();
+                    if (trimmed) {
+                        next.set("search", trimmed);
+                    } else {
+                        next.delete("search");
+                    }
+                    return next;
+                },
+                { replace: true }
+            );
+        },
+        [setSearchParams]
+    );
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -76,7 +97,7 @@ export const useProducts = () => {
         products,
         filteredProducts,
         search,
-        setSearch,
+        setSearch: handleSearchChange,
         sort,
         setSort,
         isLoading,

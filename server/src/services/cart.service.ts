@@ -1,6 +1,7 @@
 import { Cart } from "../models/Cart.model.js";
 import { Product } from "../models/Product.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { validateObjectId } from "../utils/validateObjectId.js";
 
 export const getUserCart = async (userId: string) => {
     let cart = await Cart.findOne({ user: userId }).populate(
@@ -23,6 +24,12 @@ export const addItemToCart = async (
     productId: string,
     quantity: number
 ) => {
+    validateObjectId(productId, "product");
+
+    if (!Number.isSafeInteger(quantity) || quantity <= 0) {
+        throw new ApiError(400, "Quantity must be a positive integer");
+    }
+
     const product = await Product.findById(productId);
 
     if (!product || !product.isActive) {
@@ -71,6 +78,12 @@ export const updateCartItem = async (
     productId: string,
     quantity: number
 ) => {
+    validateObjectId(productId, "product");
+
+    if (!Number.isSafeInteger(quantity) || quantity <= 0) {
+        throw new ApiError(400, "Quantity must be a positive integer");
+    }
+
     const cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
@@ -103,6 +116,8 @@ export const updateCartItem = async (
 export const removeCartItem = async (
     userId: string, productId: string
 ) => {
+    validateObjectId(productId, "product");
+
     const cart = await Cart.findOne({ user: userId });
 
     if (!cart) {
