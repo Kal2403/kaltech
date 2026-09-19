@@ -38,16 +38,19 @@ const productSchema = new Schema<IProduct>(
             type: Number,
             required: [true, "Product price is required"],
             min: 0,
+            validate: Number.isFinite,
         },
         discountPrice: {
             type: Number,
             min: 0,
+            validate: Number.isFinite,
         },
         stock: {
             type: Number,
             required: true,
             min: 0,
             default: 0,
+            validate: Number.isSafeInteger,
         },
         images: {
             type: [String],

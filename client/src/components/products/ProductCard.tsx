@@ -18,7 +18,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 <img src={product.images[0] ?? fallbackImage} alt={product.name} className="h-full w-full object-contain transition duration-500 group-hover:scale-105" loading="lazy" />
             </div>
             <div className="flex flex-1 flex-col p-5">
-                <p className="text-xs font-black uppercase tracking-wider text-blue-600">{product.category?.name ?? "Tecnología"}</p>
+                <p className="text-xs font-black uppercase tracking-wider text-blue-600">{product.category?.name ?? "Sin categoría"}</p>
                 <h2 className="mt-2 line-clamp-2 text-lg font-black leading-snug text-slate-950">{product.name}</h2>
                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{product.description}</p>
                 <div className="mt-4 flex items-baseline gap-2">

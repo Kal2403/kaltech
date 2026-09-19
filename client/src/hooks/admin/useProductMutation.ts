@@ -33,6 +33,12 @@ const getErrorMessage = (
     fallbackMessage: string
 ): string => {
     if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        if (error.response?.status === 409) {
+            return (
+                error.response.data?.message ??
+                "Conflicto: El producto fue modificado concurrentemente o el slug ya existe. Por favor recarga e intenta nuevamente."
+            );
+        }
         return error.response?.data?.message ?? fallbackMessage;
     }
 

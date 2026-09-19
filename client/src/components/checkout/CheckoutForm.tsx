@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../../routes/paths'
 
 import { useCheckout } from '../../hooks/useCheckout';
 import type { PaymentMethod, ShippingAddress } from '../../types/order.types';
@@ -39,6 +38,7 @@ export const CheckoutForm = ({
         useState<ShippingAddress>(initialShippingAddress);
 
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+    const [validationError, setValidationError] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
@@ -50,15 +50,19 @@ export const CheckoutForm = ({
             ...prev,
             [field]: value,
         }));
+        if (validationError) {
+            setValidationError(null);
+        }
     };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setValidationError(null);
 
-        const validationError = validateForm();
+        const formError = validateForm();
 
-        if (validationError) {
-            alert(validationError);
+        if (formError) {
+            setValidationError(formError);
             return;
         }
 
@@ -68,7 +72,7 @@ export const CheckoutForm = ({
         });
 
         if (order) {
-            navigate(ROUTES.home);
+            navigate(`/orders/${order._id}`);
         }
     };
 
@@ -111,9 +115,9 @@ export const CheckoutForm = ({
                     disabled={loading}
                 />
 
-                {error && (
+                {(validationError || error) && (
                     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-                        {error}
+                        {validationError || error}
                     </div>
                 )}
             </div>

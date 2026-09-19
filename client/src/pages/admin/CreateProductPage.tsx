@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import { ProductForm } from "../../components/admin/products/ProductFrom";
+import { ProductForm } from "../../components/admin/products";
 import { useProductCategories } from "../../hooks/admin/useProductCategories";
 import { useProductMutation } from "../../hooks/admin/useProductMutation";
 import { ROUTES } from "../../routes/paths";

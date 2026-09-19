@@ -6,8 +6,10 @@ import {
     getProductById,
     getProducts,
     updateProduct,
-} from "../services/product.service.js"
-import { rmSync } from "node:fs";
+    getAdminProducts,
+    getAdminProductById,
+} from "../services/product.service.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export const createProductController = async (
     req: Request,
@@ -36,14 +38,14 @@ export const getProductsController = async (
         const products = await getProducts();
 
         res.status(200).json({
-            suscces: true,
+            success: true,
             message: "Products retrieved successfully",
             data: { products },
         });
     } catch (error) {
         next(error);
     }
-}
+};
 
 export const getProductByIdController = async (
     req: Request,
@@ -54,7 +56,7 @@ export const getProductByIdController = async (
         const { id } = req.params;
 
         if (!id || Array.isArray(id)) {
-            throw new Error("Ivalid product id");
+            throw new ApiError(400, "Invalid product ID");
         }
         const product = await getProductById(id);
 
@@ -77,14 +79,14 @@ export const updateProductController = async (
         const { id } = req.params;
 
         if (!id || Array.isArray(id)) {
-            throw new Error("Invalid product id");
+            throw new ApiError(400, "Invalid product ID");
         }
 
         const product = await updateProduct(id, req.body);
 
         res.status(200).json({
             success: true,
-            message: "Product update successfully",
+            message: "Product updated successfully",
             data: { product },
         });
     } catch (error) {
@@ -101,16 +103,32 @@ export const deleteProductController = async (
         const { id } = req.params;
 
         if (!id || Array.isArray(id)) {
-            throw new Error("Invalid product id");
+            throw new ApiError(400, "Invalid product ID");
         }
 
         await deleteProduct(id);
 
         res.status(200).json({
             success: true,
-            message: "Product deleted succcesfully",
+            message: "Product deleted successfully",
         });
     } catch (error) {
         next(error);
     }
+};
+
+export const getAdminProductsController = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+        const products = await getAdminProducts();
+        res.status(200).json({ success: true, message: "Products retrieved successfully", data: { products } });
+    } catch (error) { next(error); }
+};
+
+export const getAdminProductByIdController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        if (!id || Array.isArray(id)) throw new ApiError(400, "Invalid product ID");
+        const product = await getAdminProductById(id);
+        res.status(200).json({ success: true, message: "Product retrieved successfully", data: { product } });
+    } catch (error) { next(error); }
 };

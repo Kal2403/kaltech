@@ -18,7 +18,7 @@ export interface Product {
     stock: number;
     images: string[];
     brand?: string;
-    category: ProductCategory;
+    category: ProductCategory | null;
     specs?: ProductSpecs;
     isFeatured: boolean;
     isActive: boolean;
@@ -26,12 +26,13 @@ export interface Product {
 
 export interface CreateProductPayload {
     name: string;
+    slug?: string;
     description: string;
     price: number;
-    discountPrice?: number;
+    discountPrice?: number | null;
     stock: number;
     images: string[];
-    brand?: string;
+    brand?: string | null;
     category: string;
     specs?: ProductSpecs;
     isFeatured: boolean;

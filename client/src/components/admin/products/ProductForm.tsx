@@ -23,6 +23,7 @@ interface ProductSpecificationField {
 
 interface ProductFormValues {
     name: string;
+    slug: string;
     description: string;
     price: string;
     discountPrice: string;
@@ -36,6 +37,7 @@ interface ProductFormValues {
 
 interface ProductFormErrors {
     name?: string;
+    slug?: string;
     description?: string;
     price?: string;
     discountPrice?: string;
@@ -75,6 +77,7 @@ const getInitialValues = (
 ): ProductFormValues => {
     return {
         name: product?.name ?? "",
+        slug: product?.slug ?? "",
         description: product?.description ?? "",
         price: product ? String(product.price) : "",
         discountPrice:
@@ -84,7 +87,7 @@ const getInitialValues = (
         stock: product ? String(product.stock) : "",
         images: product?.images.join("\n") ?? "",
         brand: product?.brand ?? "",
-        category: product?.category._id ?? "",
+        category: product?.category?._id ?? "",
         isFeatured: product?.isFeatured ?? false,
         isActive: product?.isActive ?? true,
     };
@@ -322,6 +325,14 @@ export const ProductForm = ({
                 "El nombre del producto es obligatorio.";
         }
 
+        if (values.slug.trim()) {
+            const normalizedSlug = values.slug.trim().toLowerCase();
+            if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalizedSlug)) {
+                validationErrors.slug =
+                    "El slug solo puede contener letras minúsculas, números y guiones simples (ej. macbook-pro-m3).";
+            }
+        }
+
         if (!values.description.trim()) {
             validationErrors.description =
                 "La descripción es obligatoria.";
@@ -433,6 +444,10 @@ export const ProductForm = ({
         const brand = values.brand.trim();
         const specs = buildSpecifications();
 
+        if (values.slug.trim()) {
+            payload.slug = values.slug.trim().toLowerCase();
+        }
+
         if (brand) {
             payload.brand = brand;
         }
@@ -502,6 +517,35 @@ export const ProductForm = ({
                                 {errors.name}
                             </p>
                         )}
+                    </div>
+
+                    <div className="md:col-span-2">
+                        <label
+                            htmlFor="slug"
+                            className="mb-2 block text-sm font-medium text-gray-700"
+                        >
+                            Slug (URL amigable)
+                        </label>
+
+                        <input
+                            id="slug"
+                            name="slug"
+                            type="text"
+                            placeholder="ej. macbook-pro-m3 (opcional, se autogenera si se deja vacío)"
+                            value={values.slug}
+                            onChange={handleTextChange}
+                            disabled={isSubmitting}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                        />
+
+                        {errors.slug && (
+                            <p className="mt-2 text-sm text-red-600">
+                                {errors.slug}
+                            </p>
+                        )}
+                        <p className="mt-1 text-xs text-gray-500">
+                            Identificador único para la URL del producto. Solo letras minúsculas, números y guiones.
+                        </p>
                     </div>
 
                     <div className="md:col-span-2">

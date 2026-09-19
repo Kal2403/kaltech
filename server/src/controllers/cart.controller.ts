@@ -7,6 +7,7 @@ import {
     removeCartItem,
     updateCartItem,
 } from "../services/cart.service.js";
+import { validateObjectId } from "../utils/validateObjectId.js";
 
 
 export const getCartController = async (
@@ -58,10 +59,11 @@ export const updateCartItemController = async (
         const { productId } = req.params;
 
         if (!productId || Array.isArray(productId)) {
-            throw new Error("Ivalid product id");
+            throw new Error("Invalid product id");
         }
 
-        const cart = await updateCartItem(req.user!.id, productId, req.body.quantity);
+        const validProductId = validateObjectId(productId, "product");
+        const cart = await updateCartItem(req.user!.id, validProductId, req.body.quantity);
 
         res.status(200).json({
             success: true,
@@ -82,14 +84,15 @@ export const removeCartItemController = async(
         const { productId } = req.params;
 
         if (!productId || Array.isArray(productId)) {
-            throw new Error("Ivalid product id");
+            throw new Error("Invalid product id");
         }
 
-        const cart = await removeCartItem(req.user!.id, productId);
+        const validProductId = validateObjectId(productId, "product");
+        const cart = await removeCartItem(req.user!.id, validProductId);
 
         res.status(200).json({
             success: true,
-            message: "Cart item removed succesfully",
+            message: "Cart item removed successfully",
             data: { cart },
         });
     } catch (error) {
@@ -106,7 +109,7 @@ export const clearCartController = async (
         const cart = await clearUserCart(req.user!.id);
 
         res.status(200).json({
-            seccess: true,
+            success: true,
             message: "Cart cleared successfully",
             data: { cart },
         });

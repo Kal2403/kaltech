@@ -12,6 +12,24 @@ interface CreateCategoryInput {
 
 type UpdateCategoryInput = Partial<CreateCategoryInput>;
 
+const validateCategoryUpdate = (data: UpdateCategoryInput): void => {
+    const allowed = ["name", "slug", "description", "image", "isActive"];
+    if (!data || typeof data !== "object" || Array.isArray(data) ||
+        Object.keys(data).some((key) => !allowed.includes(key))) {
+        throw new ApiError(400, "Invalid category update");
+    }
+    if (Object.hasOwn(data, "isActive") && typeof data.isActive !== "boolean") {
+        throw new ApiError(400, "Category active status must be a boolean");
+    }
+};
+
+const ensureCategoryCanBeDeactivated = async (id: string): Promise<void> => {
+    const hasActiveProducts = await Product.exists({ category: id, isActive: true });
+    if (hasActiveProducts) {
+        throw new ApiError(409, "Category cannot be deactivated while it has active products");
+    }
+};
+
 const ensureCategoryIsUnique = async (
     data: Pick<UpdateCategoryInput, "name" | "slug">,
     excludedCategoryId?: string
@@ -95,6 +113,7 @@ export const updateCategory = async (
     id: string,
     data: UpdateCategoryInput
 ) => {
+    validateCategoryUpdate(data);
     const categoryExists = await Category.exists({
         _id: id,
     });
@@ -103,13 +122,17 @@ export const updateCategory = async (
         throw new ApiError(404, "Category not found");
     }
 
+    if (data.isActive === false) {
+        await ensureCategoryCanBeDeactivated(id);
+    }
+
     await ensureCategoryIsUnique(data, id);
 
     const category = await Category.findByIdAndUpdate(
         id,
         data,
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
     );
@@ -128,17 +151,7 @@ export const deleteCategory = async (id: string) => {
         throw new ApiError(404, "Category not found");
     }
 
-    const hasActiveProducts = await Product.exists({
-        category: id,
-        isActive: true,
-    });
-
-    if (hasActiveProducts) {
-        throw new ApiError(
-            409,
-            "Category cannot be deactivated while it has active products"
-        );
-    }
+    await ensureCategoryCanBeDeactivated(id);
 
     category.isActive = false;
 
