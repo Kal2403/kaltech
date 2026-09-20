@@ -9,6 +9,7 @@ import {
     getAdminProducts,
     getAdminProductById,
 } from "../services/product.service.js";
+import { syncDummyTechProducts } from "../services/dummy-product.service.js";
 import { ApiError } from "../utils/ApiError.js";
 
 export const createProductController = async (
@@ -131,4 +132,22 @@ export const getAdminProductByIdController = async (req: Request, res: Response,
         const product = await getAdminProductById(id);
         res.status(200).json({ success: true, message: "Product retrieved successfully", data: { product } });
     } catch (error) { next(error); }
+};
+
+export const syncDummyProductsController = async (
+    _req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await syncDummyTechProducts();
+
+        res.status(200).json({
+            success: true,
+            message: "Products synchronized successfully from DummyJSON",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
 };
