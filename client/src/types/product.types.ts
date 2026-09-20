@@ -8,6 +8,14 @@ export interface ProductSpecs {
     [key: string]: string;
 }
 
+export interface ProductReview {
+    rating: number;
+    comment: string;
+    date: string;
+    reviewerName: string;
+    reviewerEmail?: string;
+}
+
 export interface Product {
     _id: string;
     name: string;
@@ -20,6 +28,9 @@ export interface Product {
     brand?: string;
     category: ProductCategory | null;
     specs?: ProductSpecs;
+    rating?: number;
+    reviewsCount?: number;
+    reviews?: ProductReview[];
     isFeatured: boolean;
     isActive: boolean;
 }

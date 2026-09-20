@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { FiArrowRight, FiPackage } from "react-icons/fi";
+import { StarRating } from "../common/StarRating";
 import type { Product } from "../../types/product.types";
 
 interface ProductCardProps { product: Product; }
@@ -18,8 +19,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 <img src={product.images[0] ?? fallbackImage} alt={product.name} className="h-full w-full object-contain transition duration-500 group-hover:scale-105" loading="lazy" />
             </div>
             <div className="flex flex-1 flex-col p-5">
-                <p className="text-xs font-black uppercase tracking-wider text-blue-600">{product.category?.name ?? "Sin categoría"}</p>
-                <h2 className="mt-2 line-clamp-2 text-lg font-black leading-snug text-slate-950">{product.name}</h2>
+                <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-black uppercase tracking-wider text-blue-600 truncate">{product.category?.name ?? "Sin categoría"}</p>
+                    {product.rating !== undefined && product.rating > 0 && (
+                        <StarRating rating={product.rating} size="sm" showValue={true} />
+                    )}
+                </div>
+                {product.brand && (
+                    <p className="mt-0.5 text-xs font-medium text-slate-500">{product.brand}</p>
+                )}
+                <h2 className="mt-1.5 line-clamp-2 text-lg font-black leading-snug text-slate-950">{product.name}</h2>
                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{product.description}</p>
                 <div className="mt-4 flex items-baseline gap-2">
                     <span className="text-2xl font-black text-slate-950">${finalPrice}</span>
