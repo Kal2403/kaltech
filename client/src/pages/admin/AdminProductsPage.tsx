@@ -5,9 +5,11 @@ import {
     type Location,
 } from "react-router-dom";
 
+import axios from "axios";
 import { AdminProductTable } from "../../components/admin/products";
 import { useAdminProducts } from "../../hooks/admin/useAdminProducts";
 import { ROUTES } from "../../routes/paths";
+import { syncDummyProducts } from "../../services/products/product.service";
 import type { Product } from "../../types/product.types";
 
 interface AdminProductsLocationState {
@@ -23,15 +25,19 @@ export const AdminProductsPage = () => {
     const {
         products,
         isLoading,
-        error,
+        error: fetchError,
         deletingProductId,
         refreshProducts,
         removeProduct,
     } = useAdminProducts();
 
+    const [syncError, setSyncError] = useState<string | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(
         location.state?.successMessage ?? null
     );
+
+    const error = syncError || fetchError;
 
     useEffect(() => {
         if (!location.state?.successMessage) {
@@ -82,7 +88,34 @@ export const AdminProductsPage = () => {
 
     const handleRefresh = async (): Promise<void> => {
         setSuccessMessage(null);
+        setSyncError(null);
         await refreshProducts();
+    };
+
+    const handleSyncDummy = async (): Promise<void> => {
+        try {
+            setIsSyncing(true);
+            setSyncError(null);
+            setSuccessMessage(null);
+            const response = await syncDummyProducts();
+            setSuccessMessage(
+                `Sincronización completada: ${response.data.productsInserted} productos nuevos, ${response.data.productsUpdated} actualizados.`
+            );
+            await refreshProducts();
+        } catch (err: unknown) {
+            if (axios.isAxiosError<{ message?: string }>(err)) {
+                setSyncError(
+                    err.response?.data?.message ??
+                        "Error al sincronizar con DummyJSON."
+                );
+            } else if (err instanceof Error) {
+                setSyncError(err.message);
+            } else {
+                setSyncError("Error al sincronizar productos desde DummyJSON.");
+            }
+        } finally {
+            setIsSyncing(false);
+        }
     };
 
     return (
@@ -98,13 +131,24 @@ export const AdminProductsPage = () => {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={handleCreateProduct}
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                >
-                    Crear producto
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => void handleSyncDummy()}
+                        disabled={isSyncing || isLoading}
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {isSyncing ? "Sincronizando..." : "Sincronizar Dummy API"}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={handleCreateProduct}
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    >
+                        Crear producto
+                    </button>
+                </div>
             </header>
 
             {successMessage && (
@@ -159,13 +203,26 @@ export const AdminProductsPage = () => {
                         catálogo de la tienda.
                     </p>
 
-                    <button
-                        type="button"
-                        onClick={handleCreateProduct}
-                        className="mt-5 min-h-11 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-                    >
-                        Crear primer producto
-                    </button>
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => void handleSyncDummy()}
+                            disabled={isSyncing}
+                            className="min-h-11 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {isSyncing
+                                ? "Sincronizando..."
+                                : "Sincronizar con Dummy API"}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleCreateProduct}
+                            className="min-h-11 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                        >
+                            Crear primer producto
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <>

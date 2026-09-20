@@ -1,6 +1,15 @@
 import { Router } from "express";
 
-import { createProductController, deleteProductController, getProductByIdController, getProductsController, updateProductController, getAdminProductsController, getAdminProductByIdController } from "../controllers/product.controller.js";
+import {
+    createProductController,
+    deleteProductController,
+    getProductByIdController,
+    getProductsController,
+    updateProductController,
+    getAdminProductsController,
+    getAdminProductByIdController,
+    syncDummyProductsController,
+} from "../controllers/product.controller.js";
 import { authorizeRoles, protect } from "../middlewares/auth.middleware.js";
 
 const router = Router();
@@ -10,6 +19,7 @@ router.get("/admin", protect, authorizeRoles("admin"), getAdminProductsControlle
 router.get("/admin/:id", protect, authorizeRoles("admin"), getAdminProductByIdController);
 router.get("/:id", getProductByIdController);
 
+router.post("/sync-dummy", protect, authorizeRoles("admin"), syncDummyProductsController);
 router.post("/", protect, authorizeRoles("admin"), createProductController);
 router.put("/:id", protect, authorizeRoles("admin"), updateProductController);
 router.patch("/:id", protect, authorizeRoles("admin"), updateProductController);

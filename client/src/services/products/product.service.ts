@@ -79,3 +79,23 @@ export const deleteProduct = async (
         `/products/${productId}`
     );
 };
+
+export interface SyncDummyResponse {
+    success: boolean;
+    message: string;
+    data: {
+        categoriesSynced: number;
+        productsProcessed: number;
+        productsInserted: number;
+        productsUpdated: number;
+        details: Array<{
+            category: string;
+            count: number;
+        }>;
+    };
+}
+
+export const syncDummyProducts = async (): Promise<SyncDummyResponse> => {
+    const response = await api.post<SyncDummyResponse>("/products/sync-dummy");
+    return response.data;
+};
