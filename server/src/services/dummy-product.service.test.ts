@@ -45,6 +45,15 @@ const sampleDummyProduct: DummyProductItem = {
     availabilityStatus: "In Stock",
     returnPolicy: "30 days return",
     weight: 2.1,
+    reviews: [
+        {
+            rating: 5,
+            comment: "Increíble laptop para programar",
+            date: "2025-05-01T10:00:00.000Z",
+            reviewerName: "Alex Dev",
+            reviewerEmail: "alex@example.com",
+        },
+    ],
 };
 
 before(async () => {
@@ -122,6 +131,11 @@ test("mapDummyToProductData correctly maps discount, specs and images", () => {
     assert.equal(mapped.images.length, 2);
     assert.equal(mapped.specs.dummyId, "999");
     assert.equal(mapped.specs.garantia, "2 years manufacturer warranty");
+    assert.equal(mapped.rating, 4.85);
+    assert.equal(mapped.reviewsCount, 1);
+    assert.equal(mapped.reviews.length, 1);
+    assert.equal(mapped.reviews[0].comment, "Increíble laptop para programar");
+    assert.equal(mapped.reviews[0].reviewerName, "Alex Dev");
 });
 
 test("syncDummyTechProducts upserts categories and products without duplication", async (t) => {
@@ -154,6 +168,13 @@ test("syncDummyTechProducts upserts categories and products without duplication"
 
     const countAfterFirst = await Product.countDocuments();
     assert.equal(countAfterFirst, 1);
+
+    const saved = await Product.findOne({ slug: "super-laptop-pro-16-999" });
+    assert.ok(saved);
+    assert.equal(saved.rating, 4.85);
+    assert.equal(saved.reviewsCount, 1);
+    assert.equal(saved.reviews?.length, 1);
+    assert.equal(saved.reviews?.[0]?.comment, "Increíble laptop para programar");
 
     // Second sync: should update without inserting duplicate
     const result2 = await syncDummyTechProducts();
