@@ -8,6 +8,7 @@ import {
     updateProduct,
     getAdminProducts,
     getAdminProductById,
+    type ProductFilterQuery,
 } from "../services/product.service.js";
 import { syncDummyTechProducts } from "../services/dummy-product.service.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -31,12 +32,44 @@ export const createProductController = async (
 };
 
 export const getProductsController = async (
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction
 ) => {
     try {
-        const products = await getProducts();
+        const {
+            category,
+            brand,
+            minPrice,
+            maxPrice,
+            minRating,
+            inStock,
+            search,
+            sort,
+        } = req.query;
+
+        const filterOptions: ProductFilterQuery = {
+            ...(typeof category === "string" ? { category } : {}),
+            ...(typeof brand === "string" ? { brand } : {}),
+            ...(minPrice !== undefined && !isNaN(Number(minPrice))
+                ? { minPrice: Number(minPrice) }
+                : {}),
+            ...(maxPrice !== undefined && !isNaN(Number(maxPrice))
+                ? { maxPrice: Number(maxPrice) }
+                : {}),
+            ...(minRating !== undefined && !isNaN(Number(minRating))
+                ? { minRating: Number(minRating) }
+                : {}),
+            ...(inStock === "true" || inStock === "1"
+                ? { inStock: true }
+                : inStock === "false" || inStock === "0"
+                ? { inStock: false }
+                : {}),
+            ...(typeof search === "string" ? { search } : {}),
+            ...(typeof sort === "string" ? { sort } : {}),
+        };
+
+        const products = await getProducts(filterOptions);
 
         res.status(200).json({
             success: true,

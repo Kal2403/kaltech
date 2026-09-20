@@ -38,7 +38,102 @@ export const createProduct = async (input: unknown) => {
     } catch (error) { return mapDuplicate(error); }
 };
 
-export const getProducts = () => Product.find({ isActive: true }).populate("category", "name slug").sort({ createdAt: -1 });
+export interface ProductFilterQuery {
+    category?: string;
+    brand?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    minRating?: number;
+    inStock?: boolean;
+    search?: string;
+    sort?: string;
+}
+
+export const getProducts = async (options?: ProductFilterQuery) => {
+    const filter: Record<string, unknown> = { isActive: true };
+
+    if (options?.category) {
+        if (Types.ObjectId.isValid(options.category)) {
+            filter.category = new Types.ObjectId(options.category);
+        } else {
+            const cat = await Category.findOne({ slug: options.category.toLowerCase().trim() });
+            if (cat) {
+                filter.category = cat._id;
+            } else {
+                return [];
+            }
+        }
+    }
+
+    if (options?.brand) {
+        const brands = options.brand.split(",").map((b) => b.trim()).filter(Boolean);
+        if (brands.length === 1) {
+            filter.brand = new RegExp(`^${brands[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+        } else if (brands.length > 1) {
+            filter.brand = {
+                $in: brands.map((b) => new RegExp(`^${b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i")),
+            };
+        }
+    }
+
+    if (options?.minPrice != null || options?.maxPrice != null) {
+        const priceFilter: Record<string, number> = {};
+        if (options.minPrice != null && !isNaN(options.minPrice) && options.minPrice >= 0) {
+            priceFilter.$gte = options.minPrice;
+        }
+        if (options.maxPrice != null && !isNaN(options.maxPrice) && options.maxPrice >= 0) {
+            priceFilter.$lte = options.maxPrice;
+        }
+        if (Object.keys(priceFilter).length > 0) {
+            filter.price = priceFilter;
+        }
+    }
+
+    if (options?.minRating != null && !isNaN(options.minRating) && options.minRating > 0) {
+        filter.rating = { $gte: options.minRating };
+    }
+
+    if (options?.inStock === true) {
+        filter.stock = { $gt: 0 };
+    }
+
+    if (options?.search) {
+        const searchRegex = new RegExp(options.search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        filter.$or = [
+            { name: searchRegex },
+            { description: searchRegex },
+            { brand: searchRegex },
+        ];
+    }
+
+    let sortOption: Record<string, 1 | -1> = { createdAt: -1 };
+    if (options?.sort) {
+        switch (options.sort) {
+            case "price-asc":
+                sortOption = { price: 1 };
+                break;
+            case "price-desc":
+                sortOption = { price: -1 };
+                break;
+            case "name-asc":
+                sortOption = { name: 1 };
+                break;
+            case "name-desc":
+                sortOption = { name: -1 };
+                break;
+            case "rating-desc":
+                sortOption = { rating: -1 };
+                break;
+            case "featured":
+                sortOption = { isFeatured: -1, createdAt: -1 };
+                break;
+            default:
+                sortOption = { createdAt: -1 };
+        }
+    }
+
+    return await Product.find(filter).populate("category", "name slug").sort(sortOption);
+};
 export const getAdminProducts = () => Product.find().populate("category", "name slug").sort({ createdAt: -1 });
 export const getAdminProductById = async (id: string) => {
     const product = await Product.findById(validateObjectId(id, "product")).populate("category", "name slug");

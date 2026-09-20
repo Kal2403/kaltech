@@ -3,7 +3,8 @@ export type SortOption =
     | "price-asc"
     | "price-desc"
     | "name-asc"
-    | "name-desc";
+    | "name-desc"
+    | "rating-desc";
 
 interface ProductSortProps {
     value: SortOption;
@@ -15,6 +16,7 @@ const sortOptions: Array<{
     label: string;
 }> = [
         { value: "featured", label: "Destacados" },
+        { value: "rating-desc", label: "Mejor valorados" },
         { value: "price-asc", label: "Precio: menor a mayor" },
         { value: "price-desc", label: "Precio: mayor a menor" },
         { value: "name-asc", label: "Nombre (A-Z)" },
