@@ -3,6 +3,14 @@ import { Product } from "../models/Product.model.js";
 import { Category } from "../models/Category.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
+export interface DummyReviewItem {
+    rating: number;
+    comment: string;
+    date: string;
+    reviewerName: string;
+    reviewerEmail?: string;
+}
+
 export interface DummyProductItem {
     id: number;
     title: string;
@@ -20,6 +28,7 @@ export interface DummyProductItem {
     availabilityStatus?: string;
     returnPolicy?: string;
     weight?: number;
+    reviews?: DummyReviewItem[];
 }
 
 export interface DummyCategoryConfig {
@@ -114,6 +123,19 @@ export const mapDummyToProductData = (
     if (item.returnPolicy) specs.devolucion = item.returnPolicy;
     if (item.weight != null) specs.peso = `${item.weight} kg`;
 
+    const reviews = Array.isArray(item.reviews)
+        ? item.reviews.map((rev) => ({
+              rating: Math.min(5, Math.max(1, Number(rev.rating) || 5)),
+              comment: rev.comment || "",
+              date: rev.date ? new Date(rev.date) : new Date(),
+              reviewerName: rev.reviewerName || "Cliente verificado",
+              ...(rev.reviewerEmail ? { reviewerEmail: rev.reviewerEmail } : {}),
+          }))
+        : [];
+
+    const reviewsCount = reviews.length;
+    const rating = item.rating != null ? Number(item.rating) : 0;
+
     return {
         name: item.title,
         slug,
@@ -125,7 +147,10 @@ export const mapDummyToProductData = (
         brand: item.brand || "Genérico",
         category: categoryId,
         specs,
-        isFeatured: (item.rating ?? 0) >= 4.5,
+        rating,
+        reviewsCount,
+        reviews,
+        isFeatured: rating >= 4.5,
         isActive: true,
     };
 };
@@ -194,6 +219,9 @@ export const syncDummyTechProducts = async (): Promise<SyncDummyResult> => {
                             images: productData.images,
                             brand: productData.brand,
                             specs: productData.specs,
+                            rating: productData.rating,
+                            reviewsCount: productData.reviewsCount,
+                            reviews: productData.reviews,
                             isFeatured: productData.isFeatured,
                             isActive: true,
                         },
