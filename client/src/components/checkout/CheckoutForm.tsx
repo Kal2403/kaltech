@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useCheckout } from '../../hooks/useCheckout';
+import { useProfile } from '../../hooks/useProfile';
 import type { PaymentMethod, ShippingAddress } from '../../types/order.types';
+import type { UserAddress } from '../../types/user.types';
 
 import { OrderSummary } from './OrderSummary';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
@@ -33,6 +35,7 @@ export const CheckoutForm = ({
     totalItems,
 }: CheckoutFormProps) => {
     const { loading, error, submitOrder } = useCheckout();
+    const { addresses } = useProfile();
 
     const [shippingAddress, setShippingAddress] =
         useState<ShippingAddress>(initialShippingAddress);
@@ -41,6 +44,39 @@ export const CheckoutForm = ({
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (addresses.length === 0) return;
+        const timer = setTimeout(() => {
+            setShippingAddress((prev) => {
+                if (prev.address.trim()) return prev;
+                const defaultAddr = addresses.find((a) => a.isDefault) || addresses[0];
+                return {
+                    fullName: defaultAddr.fullName,
+                    address: defaultAddr.address,
+                    city: defaultAddr.city,
+                    postalCode: defaultAddr.postalCode,
+                    country: defaultAddr.country,
+                    phone: defaultAddr.phone,
+                };
+            });
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [addresses]);
+
+    const handleSelectSavedAddress = (addr: UserAddress) => {
+        setShippingAddress({
+            fullName: addr.fullName,
+            address: addr.address,
+            city: addr.city,
+            postalCode: addr.postalCode,
+            country: addr.country,
+            phone: addr.phone,
+        });
+        if (validationError) {
+            setValidationError(null);
+        }
+    };
 
     const handleShippingChange = (
         field: keyof ShippingAddress,
@@ -107,6 +143,8 @@ export const CheckoutForm = ({
                     shippingAddress={shippingAddress}
                     onChange={handleShippingChange}
                     disabled={loading}
+                    savedAddresses={addresses}
+                    onSelectSavedAddress={handleSelectSavedAddress}
                 />
 
                 <PaymentMethodSelector
