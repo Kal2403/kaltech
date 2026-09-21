@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import {
     FiGrid,
+    FiHeart,
     FiLogOut,
     FiMenu,
     FiSearch,
@@ -11,6 +12,7 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
+import { useWishlist } from "../../hooks/useWishlist";
 import { ROUTES } from "../../routes/paths";
 
 const publicLinks = [
@@ -22,6 +24,7 @@ const publicLinks = [
 
 export const Navbar = () => {
     const { user, logout } = useAuth();
+    const { count: wishlistCount } = useWishlist();
     const navigate = useNavigate();
     const location = useLocation();
     const [isOpen, setIsOpen] = useState(false);
@@ -130,6 +133,19 @@ export const Navbar = () => {
 
                 <div className="flex shrink-0 items-center gap-2">
                     <Link
+                        to={ROUTES.wishlist}
+                        className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-800 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        aria-label={`Ver favoritos (${wishlistCount} productos)`}
+                    >
+                        <FiHeart aria-hidden="true" />
+                        {wishlistCount > 0 && (
+                            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[0.65rem] font-black text-white shadow-sm">
+                                {wishlistCount > 99 ? "99+" : wishlistCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    <Link
                         to={ROUTES.cart}
                         className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-800 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         aria-label="Ver carrito"
@@ -213,6 +229,25 @@ export const Navbar = () => {
                                 {link.label}
                             </NavLink>
                         ))}
+                        <NavLink
+                            to={ROUTES.wishlist}
+                            onClick={() => setIsOpen(false)}
+                            className={() => `flex min-h-11 items-center justify-between rounded-xl px-4 font-bold ${
+                                isLinkActive(ROUTES.wishlist)
+                                    ? "bg-red-50 text-red-600"
+                                    : "text-slate-800 hover:bg-slate-50"
+                            }`}
+                        >
+                            <span className="flex items-center gap-2">
+                                <FiHeart aria-hidden="true" />
+                                Favoritos
+                            </span>
+                            {wishlistCount > 0 && (
+                                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                                    {wishlistCount}
+                                </span>
+                            )}
+                        </NavLink>
                         {user?.role === "admin" ? (
                             <Link
                                 to={ROUTES.admin}
