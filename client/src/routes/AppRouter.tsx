@@ -16,6 +16,7 @@ import { OrdersPage } from "../pages/OrdersPage";
 import { ProductCatalogPage } from "../pages/ProductCatalogPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { WishlistPage } from "../pages/WishlistPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
 import { AdminOrderDetailsPage } from "../pages/admin/AdminOrderDetailsPage";
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
             {
                 path: "products/:id",
                 element: <ProductDetailsPage />,
+            },
+            {
+                path: "wishlist",
+                element: <WishlistPage />,
             },
             {
                 element: <ProtectedRoute />,

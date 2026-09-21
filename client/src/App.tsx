@@ -1,10 +1,13 @@
 import { AppRouter } from "./routes/AppRouter";
 import { AuthProvider } from "./context/AuthContext";
+import { WishlistProvider } from "./context/WishlistContext";
 
 const App = () => {
   return (
     <AuthProvider>
-      <AppRouter />
+      <WishlistProvider>
+        <AppRouter />
+      </WishlistProvider>
     </AuthProvider>
   );
 }
