@@ -154,7 +154,7 @@ export const Navbar = () => {
                     </Link>
 
                     <Link
-                        to={user ? ROUTES.orders : ROUTES.login}
+                        to={user ? ROUTES.profile : ROUTES.login}
                         className="hidden min-h-11 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-extrabold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:flex"
                     >
                         <FiUser aria-hidden="true" />
@@ -248,6 +248,29 @@ export const Navbar = () => {
                                 </span>
                             )}
                         </NavLink>
+                        {user ? (
+                            <NavLink
+                                to={ROUTES.profile}
+                                onClick={() => setIsOpen(false)}
+                                className={() => `flex min-h-11 items-center gap-2 rounded-xl px-4 font-bold ${
+                                    isLinkActive(ROUTES.profile)
+                                        ? "bg-blue-50 text-blue-700"
+                                        : "text-slate-800 hover:bg-slate-50"
+                                }`}
+                            >
+                                <FiUser aria-hidden="true" />
+                                Mi perfil
+                            </NavLink>
+                        ) : (
+                            <Link
+                                to={ROUTES.login}
+                                onClick={() => setIsOpen(false)}
+                                className="flex min-h-11 items-center gap-2 rounded-xl px-4 font-bold text-slate-800 hover:bg-slate-50 sm:hidden"
+                            >
+                                <FiUser aria-hidden="true" />
+                                Iniciar sesión
+                            </Link>
+                        )}
                         {user?.role === "admin" ? (
                             <Link
                                 to={ROUTES.admin}
