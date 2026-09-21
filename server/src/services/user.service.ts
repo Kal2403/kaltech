@@ -100,7 +100,7 @@ export const changeUserPassword = async (
 export const getUserAddresses = async (userId: string) => {
     validateObjectId(userId, "user");
 
-    const user = await User.findById(userId).select("addresses");
+    const user = await User.findById(userId).select("addresses isActive");
     if (!user || !user.isActive) {
         throw new ApiError(404, "User not found");
     }
