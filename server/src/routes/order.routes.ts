@@ -8,6 +8,7 @@ import {
     getOrderByIdController,
     updateOrderStatusController,
 } from "../controllers/order.controller.js";
+import { payOrderController } from "../controllers/payment.controller.js";
 import {
     authorizeRoles,
     protect,
@@ -36,6 +37,8 @@ router.patch(
 );
 
 router.post("/", createOrderController);
+
+router.post("/:id/pay", payOrderController);
 
 router.get("/my-orders", getMyOrdersController);
 

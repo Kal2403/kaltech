@@ -8,6 +8,7 @@ import orderRoutes from "./order.routes.js"
 import uploadRoutes from "./upload.routes.js";
 import wishlistRoutes from "./wishlist.routes.js";
 import userRoutes from "./user.routes.js";
+import paymentRoutes from "./payment.routes.js";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/orders", orderRoutes);
 router.use("/uploads", uploadRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/users", userRoutes);
+router.use("/payments", paymentRoutes);
 
 export default router;
