@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FiArrowLeft, FiCheck, FiShoppingCart } from "react-icons/fi";
 import { StarRating } from "../components/common/StarRating";
+import { WishlistButton } from "../components/wishlist";
 import { useCart } from "../hooks/useCart";
 import { useProductDetails } from "../hooks/useProductDetails";
 
@@ -220,21 +221,28 @@ export const ProductDetailsPage = () => {
                             </section>
                         )}
 
-                        <button
-                            disabled={product.stock <= 0 || isMutating}
-                            onClick={() => addItem(product._id, 1)}
-                            className="mt-8 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-                        >
-                            <FiShoppingCart
-                                className="text-xl"
-                                aria-hidden="true"
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <button
+                                disabled={product.stock <= 0 || isMutating}
+                                onClick={() => addItem(product._id, 1)}
+                                className="inline-flex min-h-14 flex-1 items-center justify-center gap-3 rounded-xl bg-blue-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                            >
+                                <FiShoppingCart
+                                    className="text-xl"
+                                    aria-hidden="true"
+                                />
+                                {isMutating
+                                    ? "Agregando..."
+                                    : product.stock <= 0
+                                    ? "Producto agotado"
+                                    : "Agregar al carrito"}
+                            </button>
+                            <WishlistButton
+                                product={product}
+                                variant="button"
+                                className="px-6"
                             />
-                            {isMutating
-                                ? "Agregando..."
-                                : product.stock <= 0
-                                ? "Producto agotado"
-                                : "Agregar al carrito"}
-                        </button>
+                        </div>
                         {cartError && (
                             <p
                                 role="alert"

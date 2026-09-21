@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FiArrowRight, FiPackage } from "react-icons/fi";
 import { StarRating } from "../common/StarRating";
+import { WishlistButton } from "../wishlist";
 import type { Product } from "../../types/product.types";
 
 interface ProductCardProps { product: Product; }
@@ -16,6 +17,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-slate-200/60">
             <div className="relative aspect-[4/3] overflow-hidden bg-slate-50 p-5">
                 {hasDiscount && <span className="absolute left-4 top-4 z-10 rounded-md bg-blue-600 px-2.5 py-1 text-[0.65rem] font-black uppercase tracking-wide text-white">-{discount}%</span>}
+                <WishlistButton product={product} variant="floating" />
                 <img src={product.images[0] ?? fallbackImage} alt={product.name} className="h-full w-full object-contain transition duration-500 group-hover:scale-105" loading="lazy" />
             </div>
             <div className="flex flex-1 flex-col p-5">
