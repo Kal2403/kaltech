@@ -16,6 +16,7 @@ import { OrdersPage } from "../pages/OrdersPage";
 import { ProductCatalogPage } from "../pages/ProductCatalogPage";
 import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
+import { ProfilePage } from "../pages/ProfilePage";
 import { WishlistPage } from "../pages/WishlistPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
@@ -60,6 +61,7 @@ const router = createBrowserRouter([
                     { path: "checkout", element: <CheckoutPage /> },
                     { path: "orders", element: <OrdersPage /> },
                     { path: "orders/:id", element: <OrderDetailsPage /> },
+                    { path: "profile", element: <ProfilePage /> },
                 ],
             },
             {

@@ -7,6 +7,7 @@ export const ROUTES = {
     checkout: "/checkout",
     orders: "/orders",
     orderDetails: "/orders/:id",
+    profile: "/profile",
     login: "/login",
     register: "/register",
 
