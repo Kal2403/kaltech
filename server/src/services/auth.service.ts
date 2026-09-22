@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { User } from "../models/User.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { generateToken } from "../utils/generateToken.js";
+import { sendWelcomeEmail } from "./email.service.js";
 
 interface RegisterInput {
     name: string;
@@ -105,6 +106,10 @@ export const registerUser = async (input: unknown) => {
     const token = generateToken({
         userId: user.id,
         role: user.role,
+    });
+
+    void sendWelcomeEmail(user.email, user.name).catch((err) => {
+        console.error("[Email Error] No se pudo enviar el correo de bienvenida:", err);
     });
 
     return {

@@ -11,13 +11,17 @@ import {
 } from "../modules/orders/order-status.policy.js";
 import { ApiError } from "../utils/ApiError.js";
 import { parseCreateOrderInput } from "../modules/orders/order-input.js";
+import {
+    sendOrderCreatedEmail,
+    sendOrderStatusUpdatedEmail,
+} from "./email.service.js";
 
 export const createOrder = async (
     userId: string,
     data: unknown
 ) => {
     const input = parseCreateOrderInput(data);
-    return mongoose.connection.transaction(async (session) => {
+    const createdOrder = await mongoose.connection.transaction(async (session) => {
         const cart = await Cart.findOne({
             user: userId,
         }).session(session);
@@ -108,6 +112,12 @@ export const createOrder = async (
 
         return order;
     });
+
+    void sendOrderCreatedEmail(userId, createdOrder).catch((err) => {
+        console.error("[Email Error] No se pudo enviar el correo de confirmación de orden:", err);
+    });
+
+    return createdOrder;
 };
 
 export const getMyOrders = async (userId: string) => {
@@ -190,7 +200,7 @@ export const updateOrderStatus = async (
         );
     }
 
-    return mongoose.connection.transaction(async (session) => {
+    const updated = await mongoose.connection.transaction(async (session) => {
         const order = await Order.findById(orderId).session(session);
 
         if (!order) {
@@ -247,4 +257,10 @@ export const updateOrderStatus = async (
         await updatedOrder.populate({ path: "user", select: "name email", options: { session } });
         return updatedOrder;
     });
+
+    void sendOrderStatusUpdatedEmail(updated, orderStatus).catch((err) => {
+        console.error("[Email Error] No se pudo enviar el correo de actualización de estado:", err);
+    });
+
+    return updated;
 };

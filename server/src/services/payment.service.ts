@@ -5,6 +5,7 @@ import {
 } from "../models/Order.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
+import { sendPaymentConfirmedEmail } from "./email.service.js";
 
 export interface CardPaymentInput {
     cardNumber: string;
@@ -196,5 +197,10 @@ export const payOrder = async (
     }
 
     await order.save();
+
+    void sendPaymentConfirmedEmail(order).catch((err) => {
+        console.error("[Email Error] No se pudo enviar el correo de confirmación de pago:", err);
+    });
+
     return order;
 };
