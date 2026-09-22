@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { useCheckout } from '../../hooks/useCheckout';
 import { useProfile } from '../../hooks/useProfile';
-import type { PaymentMethod, ShippingAddress } from '../../types/order.types';
+import { payOrder } from '../../services/payment/payment.service';
+import type { CardPaymentData, PaymentMethod, ShippingAddress } from '../../types/order.types';
 import type { UserAddress } from '../../types/user.types';
 
+import { CreditCardForm } from './CreditCardForm';
 import { OrderSummary } from './OrderSummary';
 import { PaymentMethodSelector } from './PaymentMethodSelector';
 import { ShippingAddressForm } from './ShippingAddressForm';
@@ -27,6 +29,14 @@ const initialShippingAddress: ShippingAddress = {
     phone: '',
 };
 
+const initialCardData: CardPaymentData = {
+    cardHolder: '',
+    cardNumber: '',
+    expiryMonth: '',
+    expiryYear: '',
+    cvv: '',
+};
+
 export const CheckoutForm = ({
     subtotal,
     tax,
@@ -40,7 +50,9 @@ export const CheckoutForm = ({
     const [shippingAddress, setShippingAddress] =
         useState<ShippingAddress>(initialShippingAddress);
 
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+    const [cardData, setCardData] = useState<CardPaymentData>(initialCardData);
+    const [isPaying, setIsPaying] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const navigate = useNavigate();
@@ -91,6 +103,19 @@ export const CheckoutForm = ({
         }
     };
 
+    const handleCardChange = (
+        field: keyof CardPaymentData,
+        value: string
+    ) => {
+        setCardData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+        if (validationError) {
+            setValidationError(null);
+        }
+    };
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setValidationError(null);
@@ -108,6 +133,19 @@ export const CheckoutForm = ({
         });
 
         if (order) {
+            if (paymentMethod === 'card') {
+                try {
+                    setIsPaying(true);
+                    await payOrder(order._id, {
+                        method: 'card',
+                        card: cardData,
+                    });
+                } catch (payErr) {
+                    console.error('Payment error:', payErr);
+                } finally {
+                    setIsPaying(false);
+                }
+            }
             navigate(`/orders/${order._id}`);
         }
     };
@@ -130,8 +168,34 @@ export const CheckoutForm = ({
             return 'Completa todos los campos de la dirección de envío.';
         }
 
+        if (paymentMethod === 'card') {
+            if (!cardData.cardHolder.trim() || cardData.cardHolder.trim().length < 2) {
+                return 'El nombre del titular en la tarjeta debe tener al menos 2 caracteres.';
+            }
+            const cleanNum = cardData.cardNumber.replace(/\D/g, '');
+            if (cleanNum.length < 13 || cleanNum.length > 19) {
+                return 'Ingresa un número de tarjeta válido (13 a 19 dígitos).';
+            }
+            const month = parseInt(cardData.expiryMonth, 10);
+            const year = parseInt(cardData.expiryYear, 10);
+            if (!month || month < 1 || month > 12) {
+                return 'El mes de vencimiento de la tarjeta no es válido (01 a 12).';
+            }
+            const now = new Date();
+            const currentYear = parseInt(now.getFullYear().toString().slice(-2), 10);
+            const currentMonth = now.getMonth() + 1;
+            if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                return 'La tarjeta se encuentra vencida.';
+            }
+            if (!cardData.cvv.trim() || cardData.cvv.trim().length < 3) {
+                return 'El código de seguridad CVV debe tener 3 o 4 dígitos.';
+            }
+        }
+
         return null;
     };
+
+    const isBusy = loading || isPaying;
 
     return (
         <form
@@ -142,7 +206,7 @@ export const CheckoutForm = ({
                 <ShippingAddressForm
                     shippingAddress={shippingAddress}
                     onChange={handleShippingChange}
-                    disabled={loading}
+                    disabled={isBusy}
                     savedAddresses={addresses}
                     onSelectSavedAddress={handleSelectSavedAddress}
                 />
@@ -150,8 +214,16 @@ export const CheckoutForm = ({
                 <PaymentMethodSelector
                     paymentMethod={paymentMethod}
                     onChange={setPaymentMethod}
-                    disabled={loading}
+                    disabled={isBusy}
                 />
+
+                {paymentMethod === 'card' && (
+                    <CreditCardForm
+                        cardData={cardData}
+                        onChange={handleCardChange}
+                        disabled={isBusy}
+                    />
+                )}
 
                 {(validationError || error) && (
                     <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
@@ -166,7 +238,7 @@ export const CheckoutForm = ({
                 shipping={shipping}
                 total={total}
                 totalItems={totalItems}
-                loading={loading}
+                loading={isBusy}
             />
         </form>
     );
