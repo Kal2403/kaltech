@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FiMail } from "react-icons/fi";
 import {
     useNavigate,
     useParams,
@@ -236,7 +237,7 @@ export const AdminOrderDetailsPage = () => {
         }
 
         setSuccessMessage(
-            `El estado del pedido fue actualizado a "${orderStatusLabels[orderStatus]}".`
+            `El estado del pedido fue actualizado a "${orderStatusLabels[orderStatus]}". Se notificó automáticamente al cliente por correo electrónico.`
         );
     };
 
@@ -391,6 +392,11 @@ export const AdminOrderDetailsPage = () => {
 
                                 <p>{order.user.email}</p>
                             </div>
+
+                            <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-900">
+                                <FiMail className="text-base text-blue-600 shrink-0" />
+                                <span>Notificaciones transaccionales automáticas activas hacia <strong>{order.user.email}</strong>.</span>
+                            </div>
                         </div>
 
                         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -495,6 +501,10 @@ export const AdminOrderDetailsPage = () => {
                                 Actualizando estado...
                             </p>
                         )}
+
+                        <p className="mt-3 text-xs text-gray-500">
+                            Al cambiar el estado se enviará automáticamente una notificación por correo al cliente.
+                        </p>
                     </section>
 
                     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
