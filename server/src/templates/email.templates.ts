@@ -62,7 +62,7 @@ export const welcomeEmailTemplate = ({
     const content = `
         <h1 style="color: #0f172a; font-size: 22px; font-weight: 800; margin-top: 0;">¡Hola ${name}! Te damos la bienvenida a KalTech</h1>
         <p>Estamos muy felices de tenerte con nosotros. A partir de ahora podrás disfrutar de una experiencia de compra diseñada para los amantes de la tecnología:</p>
-        
+
         <div class="card">
             <h3 style="margin-top: 0; color: #0f172a; font-size: 15px;">¿Qué puedes hacer en KalTech?</h3>
             <ul style="padding-left: 20px; margin-bottom: 0; color: #475569;">
