@@ -47,6 +47,32 @@ export interface AdminOrderUser {
     email: string;
 }
 
+export interface PaymentResult {
+    id: string;
+    status: string;
+    update_time?: string;
+    email_address?: string;
+    method?: string;
+}
+
+export interface CardPaymentData {
+    cardNumber: string;
+    cardHolder: string;
+    expiryMonth: string;
+    expiryYear: string;
+    cvv: string;
+    email?: string;
+}
+
+export interface ProcessPaymentPayload {
+    method: PaymentMethod;
+    card?: CardPaymentData;
+    paypal?: {
+        orderId?: string;
+        payerEmail?: string;
+    };
+}
+
 export interface Order {
     _id: string;
     user: string;
@@ -59,6 +85,8 @@ export interface Order {
     tax: number;
     shippingCost: number;
     total: number;
+    paidAt?: string;
+    paymentResult?: PaymentResult;
     createdAt: string;
     updatedAt: string;
 }

@@ -32,6 +32,14 @@ export interface IShippingAddress {
     phone: string;
 }
 
+export interface IPaymentResult {
+    id: string;
+    status: string;
+    update_time?: string;
+    email_address?: string;
+    method?: string;
+}
+
 export interface IOrder extends Document {
     user: Types.ObjectId;
     items: IOrderItem[];
@@ -43,6 +51,8 @@ export interface IOrder extends Document {
     tax: number;
     shippingCost: number;
     total: number;
+    paidAt?: Date;
+    paymentResult?: IPaymentResult;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -181,6 +191,16 @@ const orderSchema = new Schema<IOrder>(
             type: Number,
             required: true,
             min: 0,
+        },
+        paidAt: {
+            type: Date,
+        },
+        paymentResult: {
+            id: { type: String },
+            status: { type: String },
+            update_time: { type: String },
+            email_address: { type: String },
+            method: { type: String },
         },
     },
     {
