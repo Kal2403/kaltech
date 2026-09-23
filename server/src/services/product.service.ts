@@ -47,10 +47,15 @@ export interface ProductFilterQuery {
     inStock?: boolean;
     search?: string;
     sort?: string;
+    hasDiscount?: boolean;
 }
 
 export const getProducts = async (options?: ProductFilterQuery) => {
     const filter: Record<string, unknown> = { isActive: true };
+
+    if (options?.hasDiscount === true) {
+        filter.discountPrice = { $exists: true, $ne: null };
+    }
 
     if (options?.category) {
         if (Types.ObjectId.isValid(options.category)) {

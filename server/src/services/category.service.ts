@@ -84,11 +84,28 @@ export const createCategory = async (
 export const getCategories = async () => {
     const categories = await Category.find({
         isActive: true,
-    }).sort({
-        createdAt: -1,
-    });
+    })
+        .sort({
+            createdAt: -1,
+        })
+        .lean();
 
-    return categories;
+    const counts = await Product.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+    ]);
+
+    const countMap = new Map<string, number>(
+        counts.map((item: { _id: unknown; count: number }) => [
+            String(item._id),
+            item.count,
+        ])
+    );
+
+    return categories.map((cat) => ({
+        ...cat,
+        productCount: countMap.get(String(cat._id)) ?? 0,
+    }));
 };
 
 export const getAdminCategories = async () => {

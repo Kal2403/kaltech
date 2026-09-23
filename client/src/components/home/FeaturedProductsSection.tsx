@@ -17,7 +17,7 @@ export const FeaturedProductsSection = () => (
                     <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Productos destacados</h2>
                     <p className="mt-3 max-w-xl text-slate-600">Equipos elegidos por su rendimiento, calidad y valor.</p>
                 </div>
-                <Link to="/products" className="inline-flex items-center gap-2 font-bold text-blue-600 hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600">Ver catálogo <FiArrowRight aria-hidden="true" /></Link>
+                <Link to="/offers" className="inline-flex items-center gap-2 font-bold text-blue-600 hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600">Ver todas las ofertas <FiArrowRight aria-hidden="true" /></Link>
             </div>
 
             <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
