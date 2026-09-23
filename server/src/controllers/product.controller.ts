@@ -46,6 +46,7 @@ export const getProductsController = async (
             inStock,
             search,
             sort,
+            hasDiscount,
         } = req.query;
 
         const filterOptions: ProductFilterQuery = {
@@ -67,6 +68,11 @@ export const getProductsController = async (
                 : {}),
             ...(typeof search === "string" ? { search } : {}),
             ...(typeof sort === "string" ? { sort } : {}),
+            ...(hasDiscount === "true" || hasDiscount === "1"
+                ? { hasDiscount: true }
+                : hasDiscount === "false" || hasDiscount === "0"
+                ? { hasDiscount: false }
+                : {}),
         };
 
         const products = await getProducts(filterOptions);
