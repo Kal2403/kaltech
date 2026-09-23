@@ -18,6 +18,8 @@ import { ProductDetailsPage } from "../pages/ProductDetailsPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { WishlistPage } from "../pages/WishlistPage";
+import { CategoriesPage } from "../pages/CategoriesPage";
+import { OffersPage } from "../pages/OffersPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
 import { AdminOrderDetailsPage } from "../pages/admin/AdminOrderDetailsPage";
@@ -49,6 +51,14 @@ const router = createBrowserRouter([
             {
                 path: "products/:id",
                 element: <ProductDetailsPage />,
+            },
+            {
+                path: "categories",
+                element: <CategoriesPage />,
+            },
+            {
+                path: "offers",
+                element: <OffersPage />,
             },
             {
                 path: "wishlist",

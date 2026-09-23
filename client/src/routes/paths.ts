@@ -2,6 +2,8 @@ export const ROUTES = {
     home: "/",
     products: "/products",
     productDetails: "/products/:id",
+    categories: "/categories",
+    offers: "/offers",
     cart: "/cart",
     wishlist: "/wishlist",
     checkout: "/checkout",

@@ -18,8 +18,8 @@ import { ROUTES } from "../../routes/paths";
 const publicLinks = [
     { label: "Inicio", path: ROUTES.home },
     { label: "Productos", path: ROUTES.products },
-    { label: "Categorías", path: `${ROUTES.home}#categories` },
-    { label: "Ofertas", path: `${ROUTES.home}#offers` },
+    { label: "Categorías", path: ROUTES.categories },
+    { label: "Ofertas", path: ROUTES.offers },
 ];
 
 export const Navbar = () => {

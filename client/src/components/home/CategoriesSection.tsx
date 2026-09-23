@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
-import { FiArrowUpRight, FiHeadphones, FiMonitor, FiSmartphone, FiWatch } from "react-icons/fi";
-import { IoGameControllerOutline } from "react-icons/io5";
+import { FiArrowUpRight, FiHeadphones, FiMonitor, FiSmartphone, FiTablet } from "react-icons/fi";
 
 const categories = [
-    { name: "Celulares", icon: FiSmartphone },
-    { name: "Audio", icon: FiHeadphones },
-    { name: "Computadores", icon: FiMonitor },
-    { name: "Smartwatch", icon: FiWatch },
-    { name: "Accesorios", icon: IoGameControllerOutline },
+    { name: "Smartphones", slug: "smartphones", icon: FiSmartphone },
+    { name: "Laptops", slug: "laptops", icon: FiMonitor },
+    { name: "Tablets", slug: "tablets", icon: FiTablet },
+    { name: "Accesorios", slug: "mobile-accessories", icon: FiHeadphones },
 ];
 
 export const CategoriesSection = () => (
@@ -19,14 +17,14 @@ export const CategoriesSection = () => (
                     <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Encuentra lo que necesitas</h2>
                     <p className="mt-3 max-w-xl text-slate-600">Explora tecnología para cada momento de tu día.</p>
                 </div>
-                <Link to="/products" className="font-bold text-blue-600 hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600">Ver todos los productos</Link>
+                <Link to="/categories" className="font-bold text-blue-600 hover:text-blue-700 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600">Ver todas las categorías</Link>
             </div>
 
-            <div className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                {categories.map(({ name, icon: Icon }) => (
+            <div className="mt-9 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {categories.map(({ name, slug, icon: Icon }) => (
                     <Link
                         key={name}
-                        to="/products"
+                        to={`/products?category=${slug}`}
                         className="group rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:border-blue-300 hover:bg-white hover:shadow-xl hover:shadow-slate-200/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                     >
                         <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl text-blue-600 shadow-sm transition group-hover:bg-blue-600 group-hover:text-white"><Icon aria-hidden="true" /></span>

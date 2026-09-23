@@ -27,8 +27,10 @@ interface DeleteProductResponse {
     message: string;
 }
 
-export const getProducts = async (): Promise<Product[]> => {
-    const response = await api.get<ProductsResponse>("/products");
+export const getProducts = async (
+    params?: Record<string, string | number | boolean | undefined>
+): Promise<Product[]> => {
+    const response = await api.get<ProductsResponse>("/products", { params });
 
     return response.data.data.products;
 };

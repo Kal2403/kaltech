@@ -5,6 +5,7 @@ export interface Category {
     description?: string;
     image?: string;
     isActive: boolean;
+    productCount?: number;
     createdAt?: string;
     updatedAt?: string;
 }
