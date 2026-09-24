@@ -24,6 +24,7 @@ export interface ShippingAddress {
 export interface CreateOrderPayload {
     shippingAddress: ShippingAddress;
     paymentMethod: PaymentMethod;
+    couponCode?: string;
 }
 
 export interface OrderItemProduct {
@@ -73,6 +74,12 @@ export interface ProcessPaymentPayload {
     };
 }
 
+export interface OrderCouponSummary {
+    code: string;
+    discountPercent: number;
+    discountAmount: number;
+}
+
 export interface Order {
     _id: string;
     user: string;
@@ -82,6 +89,8 @@ export interface Order {
     paymentStatus: PaymentStatus;
     orderStatus: OrderStatus;
     subtotal: number;
+    discountAmount?: number;
+    coupon?: OrderCouponSummary;
     tax: number;
     shippingCost: number;
     total: number;
