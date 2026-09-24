@@ -6,6 +6,7 @@ import {
     FiHome,
     FiLayers,
     FiShoppingBag,
+    FiTag,
     FiX,
 } from "react-icons/fi";
 
@@ -31,6 +32,11 @@ const adminLinks = [
         label: "Órdenes",
         path: ROUTES.adminOrders,
         icon: FiShoppingBag,
+    },
+    {
+        label: "Cupones",
+        path: ROUTES.adminCoupons,
+        icon: FiTag,
     },
 ];
 

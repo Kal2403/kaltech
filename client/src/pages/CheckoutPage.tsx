@@ -1,8 +1,19 @@
+import { useLocation } from "react-router-dom";
+
 import { CheckoutForm } from "../components/checkout";
 import { EmptyCart } from "../components/cart";
 import { useCart } from "../hooks/useCart";
+import type { CouponValidationResult } from "../types/coupon.types";
+
+interface CheckoutLocationState {
+    appliedCoupon?: CouponValidationResult | null;
+}
 
 export const CheckoutPage = () => {
+    const location = useLocation();
+    const state = location.state as CheckoutLocationState | null;
+    const appliedCoupon = state?.appliedCoupon ?? null;
+
     const {
         items,
         subTotal,
@@ -11,9 +22,12 @@ export const CheckoutPage = () => {
         error,
     } = useCart();
 
+    const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
     const tax = Number((subTotal * 0.18).toFixed(2));
     const shipping = subTotal > 1000 || subTotal === 0 ? 0 : 25;
-    const total = subTotal + tax + shipping;
+    const total = Number(
+        Math.max(0, subTotal - discountAmount + tax + shipping).toFixed(2)
+    );
 
     if (isLoading) {
         return (
@@ -50,6 +64,8 @@ export const CheckoutPage = () => {
                 ) : (
                     <CheckoutForm
                         subtotal={subTotal}
+                        discountAmount={discountAmount}
+                        couponCode={appliedCoupon?.coupon.code}
                         tax={tax}
                         shipping={shipping}
                         total={total}

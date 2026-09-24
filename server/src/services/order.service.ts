@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Cart } from "../models/Cart.model.js";
+import { Coupon } from "../models/Coupon.model.js";
 import {
     Order,
     type IOrderItem,
@@ -72,13 +73,98 @@ export const createOrder = async (
             });
         }
 
+        let discountAmount = 0;
+        let appliedCoupon:
+            | {
+                  code: string;
+                  discountPercent: number;
+                  discountAmount: number;
+              }
+            | undefined;
+
+        if (input.couponCode) {
+            const coupon = await Coupon.findOne({
+                code: input.couponCode,
+            }).session(session);
+
+            if (!coupon) {
+                throw new ApiError(404, "Coupon not found");
+            }
+
+            if (!coupon.isActive) {
+                throw new ApiError(400, "Coupon is inactive");
+            }
+
+            const now = new Date();
+            if (coupon.validFrom && now < coupon.validFrom) {
+                throw new ApiError(400, "Coupon is not yet active");
+            }
+
+            if (coupon.validUntil && now > coupon.validUntil) {
+                throw new ApiError(400, "Coupon has expired");
+            }
+
+            if (
+                coupon.maxUses !== undefined &&
+                coupon.maxUses !== null &&
+                coupon.usedCount >= coupon.maxUses
+            ) {
+                throw new ApiError(400, "Coupon usage limit reached");
+            }
+
+            if (coupon.minOrderAmount > 0 && subtotal < coupon.minOrderAmount) {
+                throw new ApiError(
+                    400,
+                    `Minimum order amount of $${coupon.minOrderAmount} required`
+                );
+            }
+
+            let rawDiscount = (subtotal * coupon.discountPercent) / 100;
+            if (
+                coupon.maxDiscountAmount !== undefined &&
+                coupon.maxDiscountAmount !== null &&
+                rawDiscount > coupon.maxDiscountAmount
+            ) {
+                rawDiscount = coupon.maxDiscountAmount;
+            }
+
+            discountAmount = Number(
+                Math.min(subtotal, Math.max(0, rawDiscount)).toFixed(2)
+            );
+
+            appliedCoupon = {
+                code: coupon.code,
+                discountPercent: coupon.discountPercent,
+                discountAmount,
+            };
+
+            const couponUpdate = await Coupon.updateOne(
+                {
+                    _id: coupon._id,
+                    isActive: true,
+                    ...(coupon.maxUses !== undefined && coupon.maxUses !== null
+                        ? { usedCount: { $lt: coupon.maxUses } }
+                        : {}),
+                },
+                { $inc: { usedCount: 1 } },
+                { session }
+            );
+
+            if (couponUpdate.matchedCount !== 1) {
+                throw new ApiError(
+                    400,
+                    "Coupon is no longer available or limit reached"
+                );
+            }
+        }
+
         const tax = Number((subtotal * 0.18).toFixed(2));
         const shippingCost = subtotal > 1000 ? 0 : 25;
         const total = Number(
-            (subtotal + tax + shippingCost).toFixed(2)
+            Math.max(0, subtotal - discountAmount + tax + shippingCost).toFixed(2)
         );
 
-        if (![subtotal, tax, total].every(Number.isFinite)) {
+        if (![subtotal, discountAmount, tax, total].every(Number.isFinite)) {
             throw new ApiError(400, "Invalid order total");
         }
         const order = new Order({
@@ -87,6 +173,8 @@ export const createOrder = async (
             shippingAddress: input.shippingAddress,
             paymentMethod: input.paymentMethod,
             subtotal,
+            discountAmount,
+            coupon: appliedCoupon,
             tax,
             shippingCost,
             total,

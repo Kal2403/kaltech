@@ -22,6 +22,7 @@ import { CategoriesPage } from "../pages/CategoriesPage";
 import { OffersPage } from "../pages/OffersPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
+import { AdminCouponsPage } from "../pages/admin/AdminCouponsPage";
 import { AdminOrderDetailsPage } from "../pages/admin/AdminOrderDetailsPage";
 import { AdminOrdersPage } from "../pages/admin/AdminOrdersPage";
 import { AdminProductsPage } from "../pages/admin/AdminProductsPage";
@@ -100,6 +101,7 @@ const router = createBrowserRouter([
                     { path: "categories/:id/edit", element: <EditCategoryPage /> },
                     { path: "orders", element: <AdminOrdersPage /> },
                     { path: "orders/:id", element: <AdminOrderDetailsPage /> },
+                    { path: "coupons", element: <AdminCouponsPage /> },
                 ],
             },
         ],

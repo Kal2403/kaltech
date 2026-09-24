@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { CartItemCard, CartSummary, EmptyCart } from "../components/cart";
 import { useCart } from "../hooks/useCart";
-import { ROUTES } from "../routes/paths"
+import { ROUTES } from "../routes/paths";
+import type { CouponValidationResult } from "../types/coupon.types";
 
 export const CartPage = () => {
     const navigate = useNavigate();
+    const [appliedCoupon, setAppliedCoupon] =
+        useState<CouponValidationResult | null>(null);
 
     const {
         items,
@@ -19,8 +23,17 @@ export const CartPage = () => {
         clearCart,
     } = useCart();
 
+    const effectiveCoupon =
+        appliedCoupon && subTotal >= (appliedCoupon.coupon.minOrderAmount ?? 0)
+            ? appliedCoupon
+            : null;
+
     const handleCheckout = () => {
-        navigate(ROUTES.checkout);
+        navigate(ROUTES.checkout, {
+            state: {
+                appliedCoupon: effectiveCoupon,
+            },
+        });
     };
 
     if (isLoading) {
@@ -87,6 +100,8 @@ export const CartPage = () => {
                             totalItems={totalItems}
                             isDisabled={isMutating}
                             onCheckout={handleCheckout}
+                            appliedCoupon={effectiveCoupon}
+                            onCouponChange={setAppliedCoupon}
                         />
                     </div>
                 )}

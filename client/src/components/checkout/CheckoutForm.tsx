@@ -14,6 +14,8 @@ import { ShippingAddressForm } from './ShippingAddressForm';
 
 interface CheckoutFormProps {
     subtotal: number;
+    discountAmount?: number;
+    couponCode?: string;
     tax: number;
     shipping: number;
     total: number;
@@ -39,6 +41,8 @@ const initialCardData: CardPaymentData = {
 
 export const CheckoutForm = ({
     subtotal,
+    discountAmount = 0,
+    couponCode,
     tax,
     shipping,
     total,
@@ -130,6 +134,7 @@ export const CheckoutForm = ({
         const order = await submitOrder({
             shippingAddress,
             paymentMethod,
+            ...(couponCode ? { couponCode } : {}),
         });
 
         if (order) {
@@ -234,6 +239,8 @@ export const CheckoutForm = ({
 
             <OrderSummary
                 subtotal={subtotal}
+                discountAmount={discountAmount}
+                couponCode={couponCode}
                 tax={tax}
                 shipping={shipping}
                 total={total}

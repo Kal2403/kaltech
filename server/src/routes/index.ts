@@ -9,6 +9,7 @@ import uploadRoutes from "./upload.routes.js";
 import wishlistRoutes from "./wishlist.routes.js";
 import userRoutes from "./user.routes.js";
 import paymentRoutes from "./payment.routes.js";
+import couponRoutes from "./coupon.routes.js";
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use("/uploads", uploadRoutes);
 router.use("/wishlist", wishlistRoutes);
 router.use("/users", userRoutes);
 router.use("/payments", paymentRoutes);
+router.use("/coupons", couponRoutes);
 
 export default router;
