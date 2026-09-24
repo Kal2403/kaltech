@@ -49,5 +49,10 @@ export const parseCreateOrderInput = (value: unknown): CreateOrderInput => {
         }
     }
 
-    return { shippingAddress, paymentMethod, couponCode };
+    const result: CreateOrderInput = { shippingAddress, paymentMethod };
+    if (couponCode !== undefined) {
+        result.couponCode = couponCode;
+    }
+
+    return result;
 };
