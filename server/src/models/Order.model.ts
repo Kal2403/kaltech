@@ -40,6 +40,12 @@ export interface IPaymentResult {
     method?: string;
 }
 
+export interface IOrderCouponSummary {
+    code: string;
+    discountPercent: number;
+    discountAmount: number;
+}
+
 export interface IOrder extends Document {
     user: Types.ObjectId;
     items: IOrderItem[];
@@ -48,6 +54,8 @@ export interface IOrder extends Document {
     paymentStatus: PaymentStatus;
     orderStatus: OrderStatus;
     subtotal: number;
+    discountAmount?: number;
+    coupon?: IOrderCouponSummary;
     tax: number;
     shippingCost: number;
     total: number;
@@ -174,6 +182,26 @@ const orderSchema = new Schema<IOrder>(
             type: Number,
             required: true,
             min: 0,
+        },
+        discountAmount: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        coupon: {
+            code: {
+                type: String,
+                trim: true,
+            },
+            discountPercent: {
+                type: Number,
+                min: 1,
+                max: 99,
+            },
+            discountAmount: {
+                type: Number,
+                min: 0,
+            },
         },
         tax: {
             type: Number,

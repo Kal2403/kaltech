@@ -1,9 +1,10 @@
 import type { IShippingAddress, PaymentMethod } from "../../models/Order.model.js";
 import { ApiError } from "../../utils/ApiError.js";
 
-interface CreateOrderInput {
+export interface CreateOrderInput {
     shippingAddress: IShippingAddress;
     paymentMethod: PaymentMethod;
+    couponCode?: string;
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -37,5 +38,16 @@ export const parseCreateOrderInput = (value: unknown): CreateOrderInput => {
         throw new ApiError(400, "Invalid payment method");
     }
 
-    return { shippingAddress, paymentMethod };
+    let couponCode: string | undefined;
+    if (value.couponCode !== undefined && value.couponCode !== null) {
+        if (typeof value.couponCode !== "string") {
+            throw new ApiError(400, "Coupon code must be a string");
+        }
+        const trimmed = value.couponCode.trim().toUpperCase();
+        if (trimmed.length > 0) {
+            couponCode = trimmed;
+        }
+    }
+
+    return { shippingAddress, paymentMethod, couponCode };
 };
