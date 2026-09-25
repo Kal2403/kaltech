@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { OrderItem, OrderSummary, PaymentModal } from "../components/orders";
+import { OrderItem, OrderSummary, OrderTimeline, PaymentModal } from "../components/orders";
 import { useOrderDetails } from "../hooks/useOrderDetails";
 import { ROUTES } from "../routes/paths";
 
@@ -78,6 +78,8 @@ export const OrderDetailsPage = () => {
 
                 <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
                     <div className="space-y-8">
+                        <OrderTimeline order={order} />
+
                         <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                             <h2 className="mb-5 text-2xl font-black text-slate-950">Productos</h2>
                             <div className="space-y-4">

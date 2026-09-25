@@ -12,6 +12,7 @@ import {
 import type {
     AdminOrder,
     OrderStatus,
+    UpdateOrderStatusPayload,
 } from "../../types/order.types";
 
 interface ApiErrorResponse {
@@ -25,7 +26,8 @@ interface UseAdminOrderDetailsReturn {
     error: string | null;
     reloadOrder: () => Promise<void>;
     changeOrderStatus: (
-        orderStatus: OrderStatus
+        orderStatus: OrderStatus,
+        options?: Omit<UpdateOrderStatusPayload, "orderStatus">
     ) => Promise<boolean>;
 }
 
@@ -94,7 +96,8 @@ export const useAdminOrderDetails = (
 
     const changeOrderStatus = useCallback(
         async (
-            orderStatus: OrderStatus
+            orderStatus: OrderStatus,
+            options?: Omit<UpdateOrderStatusPayload, "orderStatus">
         ): Promise<boolean> => {
             if (!orderId) {
                 setError(
@@ -110,6 +113,7 @@ export const useAdminOrderDetails = (
                 const updatedOrder =
                     await updateOrderStatus(orderId, {
                         orderStatus,
+                        ...options,
                     });
 
                 setOrder(updatedOrder);

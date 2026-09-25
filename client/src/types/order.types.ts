@@ -80,6 +80,14 @@ export interface OrderCouponSummary {
     discountAmount: number;
 }
 
+export interface OrderTimelineEvent {
+    status: OrderStatus;
+    title: string;
+    description?: string;
+    location?: string;
+    timestamp: string;
+}
+
 export interface Order {
     _id: string;
     user: string;
@@ -96,6 +104,10 @@ export interface Order {
     total: number;
     paidAt?: string;
     paymentResult?: PaymentResult;
+    trackingNumber?: string;
+    carrier?: string;
+    estimatedDelivery?: string;
+    timeline?: OrderTimelineEvent[];
     createdAt: string;
     updatedAt: string;
 }
@@ -107,6 +119,10 @@ export interface AdminOrder
 
 export interface UpdateOrderStatusPayload {
     orderStatus: OrderStatus;
+    trackingNumber?: string;
+    carrier?: string;
+    estimatedDelivery?: string;
+    note?: string;
 }
 
 export interface OrderPagination {

@@ -196,6 +196,17 @@ export const payOrder = async (
         order.orderStatus = "processing";
     }
 
+    if (!order.timeline) {
+        order.timeline = [];
+    }
+
+    order.timeline.push({
+        status: order.orderStatus,
+        title: "Pago verificado",
+        description: `Pago registrado exitosamente vía ${paymentInput.method.toUpperCase()}. Identificador: ${paymentResult.id}`,
+        timestamp: new Date(),
+    });
+
     await order.save();
 
     void sendPaymentConfirmedEmail(order).catch((err) => {

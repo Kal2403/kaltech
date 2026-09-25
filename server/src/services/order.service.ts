@@ -4,6 +4,8 @@ import { Coupon } from "../models/Coupon.model.js";
 import {
     Order,
     type IOrderItem,
+    type IOrderTimelineEvent,
+    type OrderStatus,
 } from "../models/Order.model.js";
 import { Product } from "../models/Product.model.js";
 import {
@@ -178,6 +180,14 @@ export const createOrder = async (
             tax,
             shippingCost,
             total,
+            timeline: [
+                {
+                    status: "pending",
+                    title: "Pedido recibido",
+                    description: "El pedido ha sido registrado exitosamente en el sistema",
+                    timestamp: new Date(),
+                },
+            ],
         });
         await order.validate();
 
@@ -277,9 +287,84 @@ export const getAdminOrderById = async (
     return order;
 };
 
+export interface UpdateOrderStatusOptions {
+    trackingNumber?: string;
+    carrier?: string;
+    estimatedDelivery?: Date | string;
+    note?: string;
+}
+
+const getTimelineDetailsForStatus = (
+    status: OrderStatus,
+    options?: UpdateOrderStatusOptions,
+    isSameStatus?: boolean
+): { title: string; description: string } => {
+    if (options?.note?.trim()) {
+        const titleMap: Record<OrderStatus, string> = {
+            pending: "En espera",
+            processing: "En preparación",
+            shipped: "En camino",
+            delivered: "Entregado",
+            cancelled: "Cancelado",
+        };
+        return {
+            title: isSameStatus ? "Actualización de envío" : (titleMap[status] ?? "Estado actualizado"),
+            description: options.note.trim(),
+        };
+    }
+
+    if (isSameStatus) {
+        const carrier = options?.carrier?.trim();
+        const tracking = options?.trackingNumber?.trim();
+        const desc = carrier && tracking
+            ? `Datos de envío actualizados con ${carrier}. Guía: ${tracking}`
+            : "Datos de seguimiento del pedido actualizados";
+        return {
+            title: "Actualización de seguimiento",
+            description: desc,
+        };
+    }
+
+    switch (status) {
+        case "processing":
+            return {
+                title: "En preparación",
+                description: "El pedido está siendo preparado y empaquetado",
+            };
+        case "shipped": {
+            const carrier = options?.carrier?.trim();
+            const tracking = options?.trackingNumber?.trim();
+            const desc = carrier && tracking
+                ? `Pedido enviado con ${carrier}. Número de seguimiento: ${tracking}`
+                : "El pedido ha sido enviado y se encuentra en camino";
+            return {
+                title: "En camino",
+                description: desc,
+            };
+        }
+        case "delivered":
+            return {
+                title: "Entregado",
+                description: "El pedido ha sido entregado en la dirección de destino",
+            };
+        case "cancelled":
+            return {
+                title: "Cancelado",
+                description: "El pedido ha sido cancelado",
+            };
+        case "pending":
+        default:
+            return {
+                title: "En espera",
+                description: "El pedido se encuentra en espera de procesamiento",
+            };
+    }
+};
+
 export const updateOrderStatus = async (
     orderId: string,
-    orderStatus: unknown
+    orderStatus: unknown,
+    options?: UpdateOrderStatusOptions
 ) => {
     if (!isOrderStatus(orderStatus)) {
         throw new ApiError(
@@ -299,10 +384,39 @@ export const updateOrderStatus = async (
             throw new ApiError(409, "Invalid order status transition");
         }
 
+        const trackingNumber =
+            typeof options?.trackingNumber === "string" && options.trackingNumber.trim().length > 0
+                ? options.trackingNumber.trim()
+                : undefined;
+        const carrier =
+            typeof options?.carrier === "string" && options.carrier.trim().length > 0
+                ? options.carrier.trim()
+                : undefined;
+
+        let parsedEstimatedDelivery: Date | undefined;
+        if (options?.estimatedDelivery) {
+            const date = new Date(options.estimatedDelivery);
+            if (!isNaN(date.getTime())) {
+                parsedEstimatedDelivery = date;
+            }
+        }
+
+        const isSameStatus = order.orderStatus === orderStatus;
+
         // A retry of a committed cancellation must never restore stock twice.
-        if (order.orderStatus === orderStatus) {
-            await order.populate({ path: "user", select: "name email", options: { session } });
-            return order;
+        // If status is identical, only proceed if new tracking information or a note is provided.
+        if (isSameStatus) {
+            const hasUpdates =
+                orderStatus !== "cancelled" &&
+                (trackingNumber !== undefined ||
+                    carrier !== undefined ||
+                    parsedEstimatedDelivery !== undefined ||
+                    (Boolean(options?.note && options.note.trim().length > 0)));
+
+            if (!hasUpdates) {
+                await order.populate({ path: "user", select: "name email", options: { session } });
+                return order;
+            }
         }
 
         if (orderStatus === "cancelled" && (
@@ -312,9 +426,36 @@ export const updateOrderStatus = async (
             throw new ApiError(409, "Order quantities must be corrected before cancellation");
         }
 
+        const { title, description } = getTimelineDetailsForStatus(orderStatus, options, isSameStatus);
+
+        const newTimelineEvent: IOrderTimelineEvent = {
+            status: orderStatus,
+            title,
+            description,
+            location: carrier,
+            timestamp: new Date(),
+        };
+
+        const updateSet: Record<string, unknown> = {
+            orderStatus,
+        };
+
+        if (trackingNumber !== undefined) {
+            updateSet.trackingNumber = trackingNumber;
+        }
+        if (carrier !== undefined) {
+            updateSet.carrier = carrier;
+        }
+        if (parsedEstimatedDelivery !== undefined) {
+            updateSet.estimatedDelivery = parsedEstimatedDelivery;
+        }
+
         const updatedOrder = await Order.findOneAndUpdate(
             { _id: orderId, orderStatus: order.orderStatus },
-            { $set: { orderStatus } },
+            {
+                $set: updateSet,
+                $push: { timeline: newTimelineEvent },
+            },
             { returnDocument: "after", runValidators: true, session }
         );
 
