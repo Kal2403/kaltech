@@ -46,6 +46,14 @@ export interface IOrderCouponSummary {
     discountAmount: number;
 }
 
+export interface IOrderTimelineEvent {
+    status: OrderStatus;
+    title: string;
+    description?: string;
+    location?: string;
+    timestamp: Date;
+}
+
 export interface IOrder extends Document {
     user: Types.ObjectId;
     items: IOrderItem[];
@@ -61,6 +69,10 @@ export interface IOrder extends Document {
     total: number;
     paidAt?: Date;
     paymentResult?: IPaymentResult;
+    trackingNumber?: string;
+    carrier?: string;
+    estimatedDelivery?: Date;
+    timeline: IOrderTimelineEvent[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -128,6 +140,43 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
             type: String,
             required: true,
             trim: true,
+        },
+    },
+    {
+        _id: false,
+    }
+);
+
+const orderTimelineEventSchema = new Schema<IOrderTimelineEvent>(
+    {
+        status: {
+            type: String,
+            enum: [
+                "pending",
+                "processing",
+                "shipped",
+                "delivered",
+                "cancelled",
+            ],
+            required: true,
+        },
+        title: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        description: {
+            type: String,
+            trim: true,
+        },
+        location: {
+            type: String,
+            trim: true,
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now,
+            required: true,
         },
     },
     {
@@ -229,6 +278,21 @@ const orderSchema = new Schema<IOrder>(
             update_time: { type: String },
             email_address: { type: String },
             method: { type: String },
+        },
+        trackingNumber: {
+            type: String,
+            trim: true,
+        },
+        carrier: {
+            type: String,
+            trim: true,
+        },
+        estimatedDelivery: {
+            type: Date,
+        },
+        timeline: {
+            type: [orderTimelineEventSchema],
+            default: [],
         },
     },
     {

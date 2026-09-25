@@ -144,10 +144,23 @@ export const updateOrderStatusController = async (
 ) => {
     try {
         const orderId = getOrderIdFromRequest(req);
+        const {
+            orderStatus,
+            trackingNumber,
+            carrier,
+            estimatedDelivery,
+            note,
+        } = req.body;
 
         const order = await updateOrderStatus(
             orderId,
-            req.body.orderStatus
+            orderStatus,
+            {
+                trackingNumber,
+                carrier,
+                estimatedDelivery,
+                note,
+            }
         );
 
         res.status(200).json({
