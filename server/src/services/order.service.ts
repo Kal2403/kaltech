@@ -296,7 +296,8 @@ export interface UpdateOrderStatusOptions {
 
 const getTimelineDetailsForStatus = (
     status: OrderStatus,
-    options?: UpdateOrderStatusOptions
+    options?: UpdateOrderStatusOptions,
+    isSameStatus?: boolean
 ): { title: string; description: string } => {
     if (options?.note?.trim()) {
         const titleMap: Record<OrderStatus, string> = {
@@ -307,8 +308,20 @@ const getTimelineDetailsForStatus = (
             cancelled: "Cancelado",
         };
         return {
-            title: titleMap[status] ?? "Estado actualizado",
+            title: isSameStatus ? "Actualización de envío" : (titleMap[status] ?? "Estado actualizado"),
             description: options.note.trim(),
+        };
+    }
+
+    if (isSameStatus) {
+        const carrier = options?.carrier?.trim();
+        const tracking = options?.trackingNumber?.trim();
+        const desc = carrier && tracking
+            ? `Datos de envío actualizados con ${carrier}. Guía: ${tracking}`
+            : "Datos de seguimiento del pedido actualizados";
+        return {
+            title: "Actualización de seguimiento",
+            description: desc,
         };
     }
 
@@ -371,19 +384,6 @@ export const updateOrderStatus = async (
             throw new ApiError(409, "Invalid order status transition");
         }
 
-        // A retry of a committed cancellation must never restore stock twice.
-        if (order.orderStatus === orderStatus) {
-            await order.populate({ path: "user", select: "name email", options: { session } });
-            return order;
-        }
-
-        if (orderStatus === "cancelled" && (
-            order.items.length === 0 ||
-            order.items.some((item) => !Number.isSafeInteger(item.quantity) || item.quantity <= 0)
-        )) {
-            throw new ApiError(409, "Order quantities must be corrected before cancellation");
-        }
-
         const trackingNumber =
             typeof options?.trackingNumber === "string" && options.trackingNumber.trim().length > 0
                 ? options.trackingNumber.trim()
@@ -401,7 +401,32 @@ export const updateOrderStatus = async (
             }
         }
 
-        const { title, description } = getTimelineDetailsForStatus(orderStatus, options);
+        const isSameStatus = order.orderStatus === orderStatus;
+
+        // A retry of a committed cancellation must never restore stock twice.
+        // If status is identical, only proceed if new tracking information or a note is provided.
+        if (isSameStatus) {
+            const hasUpdates =
+                orderStatus !== "cancelled" &&
+                (trackingNumber !== undefined ||
+                    carrier !== undefined ||
+                    parsedEstimatedDelivery !== undefined ||
+                    (Boolean(options?.note && options.note.trim().length > 0)));
+
+            if (!hasUpdates) {
+                await order.populate({ path: "user", select: "name email", options: { session } });
+                return order;
+            }
+        }
+
+        if (orderStatus === "cancelled" && (
+            order.items.length === 0 ||
+            order.items.some((item) => !Number.isSafeInteger(item.quantity) || item.quantity <= 0)
+        )) {
+            throw new ApiError(409, "Order quantities must be corrected before cancellation");
+        }
+
+        const { title, description } = getTimelineDetailsForStatus(orderStatus, options, isSameStatus);
 
         const newTimelineEvent: IOrderTimelineEvent = {
             status: orderStatus,
