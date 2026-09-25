@@ -5,6 +5,7 @@ import {
     useParams,
 } from "react-router-dom";
 
+import { OrderTimeline } from "../../components/orders";
 import { useAdminOrderDetails } from "../../hooks/admin/useAdminOrderDetails";
 import { ROUTES } from "../../routes/paths";
 import type {
@@ -219,26 +220,56 @@ export const AdminOrderDetailsPage = () => {
 
     const [successMessage, setSuccessMessage] =
         useState<string | null>(null);
+    const [selectedStatus, setSelectedStatus] =
+        useState<OrderStatus | "">("");
+    const [carrier, setCarrier] = useState("");
+    const [trackingNumber, setTrackingNumber] = useState("");
+    const [estimatedDelivery, setEstimatedDelivery] = useState("");
+    const [statusNote, setStatusNote] = useState("");
 
     const handleBack = (): void => {
         navigate(ROUTES.adminOrders);
     };
 
-    const handleStatusChange = async (
-        orderStatus: OrderStatus
+    const handleStatusFormSubmit = async (
+        e: React.FormEvent
     ): Promise<void> => {
+        e.preventDefault();
+        if (!order) return;
         setSuccessMessage(null);
 
-        const wasUpdated =
-            await changeOrderStatus(orderStatus);
+        const targetStatus =
+            selectedStatus !== ""
+                ? selectedStatus
+                : order.orderStatus;
+
+        const currentCarrier = carrier.trim() || order.carrier;
+        const currentTracking =
+            trackingNumber.trim() || order.trackingNumber;
+        const currentEstimated =
+            estimatedDelivery ||
+            (order.estimatedDelivery
+                ? new Date(order.estimatedDelivery)
+                      .toISOString()
+                      .split("T")[0]
+                : undefined);
+
+        const wasUpdated = await changeOrderStatus(targetStatus, {
+            carrier: currentCarrier,
+            trackingNumber: currentTracking,
+            estimatedDelivery: currentEstimated,
+            note: statusNote.trim() || undefined,
+        });
 
         if (!wasUpdated) {
             return;
         }
 
         setSuccessMessage(
-            `El estado del pedido fue actualizado a "${orderStatusLabels[orderStatus]}". Se notificó automáticamente al cliente por correo electrónico.`
+            `El estado del pedido fue actualizado a "${orderStatusLabels[targetStatus]}". Se notificó automáticamente al cliente por correo electrónico.`
         );
+        setSelectedStatus("");
+        setStatusNote("");
     };
 
     if (isLoading) {
@@ -377,6 +408,8 @@ export const AdminOrderDetailsPage = () => {
 
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div className="space-y-6">
+                    <OrderTimeline order={order} />
+
                     <OrderItemsSection order={order} />
 
                     <section className="grid gap-6 md:grid-cols-2">
@@ -458,53 +491,134 @@ export const AdminOrderDetailsPage = () => {
                 <aside className="space-y-6">
                     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                         <h2 className="text-lg font-semibold text-gray-900">
-                            Estado del pedido
+                            Gestión del estado y envío
                         </h2>
 
-                        <label
-                            htmlFor="orderStatus"
-                            className="mt-5 block text-sm font-medium text-gray-700"
-                        >
-                            Actualizar estado
-                        </label>
+                        <form onSubmit={(e) => void handleStatusFormSubmit(e)} className="mt-5 space-y-4">
+                            <div>
+                                <label
+                                    htmlFor="orderStatus"
+                                    className="block text-sm font-medium text-gray-700"
+                                >
+                                    Actualizar estado
+                                </label>
 
-                        <select
-                            id="orderStatus"
-                            value={order.orderStatus}
-                            disabled={isUpdatingStatus}
-                            onChange={(event) => {
-                                void handleStatusChange(
-                                    event.target
-                                        .value as OrderStatus
-                                );
-                            }}
-                            className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
-                        >
-                            {orderStatusOptions
-                                .filter((option) =>
-                                    getAvailableOrderStatuses(order.orderStatus).includes(option.value)
-                                )
-                                .map(
-                                (option) => (
-                                    <option
-                                        key={option.value}
-                                        value={option.value}
-                                    >
-                                        {option.label}
-                                    </option>
-                                )
+                                <select
+                                    id="orderStatus"
+                                    value={selectedStatus !== "" ? selectedStatus : order.orderStatus}
+                                    disabled={isUpdatingStatus || getAvailableOrderStatuses(order.orderStatus).length <= 1}
+                                    onChange={(event) => {
+                                        setSelectedStatus(event.target.value as OrderStatus);
+                                    }}
+                                    className="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                                >
+                                    {orderStatusOptions
+                                        .filter((option) =>
+                                            getAvailableOrderStatuses(order.orderStatus).includes(option.value)
+                                        )
+                                        .map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            {/* Tracking inputs when status is shipped or being transitioned to shipped */}
+                            {((selectedStatus !== "" ? selectedStatus : order.orderStatus) === "shipped" || order.orderStatus === "shipped") && (
+                                <div className="space-y-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+                                    <p className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                                        Datos de Despacho y Envío
+                                    </p>
+
+                                    <div>
+                                        <label htmlFor="carrier" className="block text-xs font-semibold text-slate-700">
+                                            Empresa de Envío (Courier)
+                                        </label>
+                                        <input
+                                            id="carrier"
+                                            type="text"
+                                            list="admin-carriers-list"
+                                            value={carrier}
+                                            onChange={(e) => setCarrier(e.target.value)}
+                                            placeholder={order.carrier || "Ej. DHL Express, FedEx, Olva..."}
+                                            className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        />
+                                        <datalist id="admin-carriers-list">
+                                            <option value="DHL Express" />
+                                            <option value="FedEx" />
+                                            <option value="Olva Courier" />
+                                            <option value="Servientrega" />
+                                            <option value="Shalom" />
+                                            <option value="Correos de España" />
+                                        </datalist>
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="trackingNumber" className="block text-xs font-semibold text-slate-700">
+                                            Número de Guía
+                                        </label>
+                                        <input
+                                            id="trackingNumber"
+                                            type="text"
+                                            value={trackingNumber}
+                                            onChange={(e) => setTrackingNumber(e.target.value)}
+                                            placeholder={order.trackingNumber || "Ej. DHL-83920194"}
+                                            className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="estimatedDelivery" className="block text-xs font-semibold text-slate-700">
+                                            Fecha Estimada de Entrega
+                                        </label>
+                                        <input
+                                            id="estimatedDelivery"
+                                            type="date"
+                                            value={estimatedDelivery}
+                                            onChange={(e) => setEstimatedDelivery(e.target.value)}
+                                            className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        />
+                                    </div>
+                                </div>
                             )}
-                        </select>
 
-                        {isUpdatingStatus && (
-                            <p className="mt-2 text-sm font-medium text-blue-600">
-                                Actualizando estado...
+                            <div>
+                                <label htmlFor="statusNote" className="block text-xs font-semibold text-slate-700">
+                                    Nota para la línea de tiempo (opcional)
+                                </label>
+                                <textarea
+                                    id="statusNote"
+                                    rows={2}
+                                    value={statusNote}
+                                    onChange={(e) => setStatusNote(e.target.value)}
+                                    placeholder="Nota explicativa para el cliente o registro interno..."
+                                    className="mt-1 w-full rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={
+                                    isUpdatingStatus ||
+                                    ((selectedStatus === "" || selectedStatus === order.orderStatus) &&
+                                        !carrier.trim() &&
+                                        !trackingNumber.trim() &&
+                                        !estimatedDelivery &&
+                                        !statusNote.trim())
+                                }
+                                className="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                            >
+                                {isUpdatingStatus ? "Actualizando estado..." : "Guardar cambios"}
+                            </button>
+
+                            <p className="text-xs text-gray-500">
+                                Al actualizar se registrará el evento en la línea de tiempo y se notificará automáticamente al cliente por correo.
                             </p>
-                        )}
-
-                        <p className="mt-3 text-xs text-gray-500">
-                            Al cambiar el estado se enviará automáticamente una notificación por correo al cliente.
-                        </p>
+                        </form>
                     </section>
 
                     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
