@@ -14,7 +14,8 @@ export interface IProduct extends Document {
     description: string;
     price: number;
     discountPrice?: number;
-    stock: number,
+    stock: number;
+    lowStockThreshold?: number;
     images: string[];
     brand?: string;
     category: Types.ObjectId;
@@ -91,6 +92,12 @@ const productSchema = new Schema<IProduct>(
             required: true,
             min: 0,
             default: 0,
+            validate: Number.isSafeInteger,
+        },
+        lowStockThreshold: {
+            type: Number,
+            min: 0,
+            default: 5,
             validate: Number.isSafeInteger,
         },
         images: {

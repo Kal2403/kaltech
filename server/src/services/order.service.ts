@@ -17,6 +17,7 @@ import { parseCreateOrderInput } from "../modules/orders/order-input.js";
 import {
     sendOrderCreatedEmail,
     sendOrderStatusUpdatedEmail,
+    sendLowStockAlertEmail,
 } from "./email.service.js";
 
 export const createOrder = async (
@@ -214,6 +215,21 @@ export const createOrder = async (
     void sendOrderCreatedEmail(userId, createdOrder).catch((err) => {
         console.error("[Email Error] No se pudo enviar el correo de confirmación de orden:", err);
     });
+
+    void (async () => {
+        try {
+            const productIds = createdOrder.items.map((item) => item.product);
+            const products = await Product.find({ _id: { $in: productIds } });
+            for (const prod of products) {
+                const threshold = prod.lowStockThreshold ?? 5;
+                if (prod.stock <= threshold) {
+                    await sendLowStockAlertEmail(prod, prod.stock);
+                }
+            }
+        } catch (err) {
+            console.error("[Email Error] No se pudieron verificar las alertas de stock bajo:", err);
+        }
+    })();
 
     return createdOrder;
 };

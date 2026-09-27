@@ -8,6 +8,7 @@ export interface ProductInput {
     price?: number;
     discountPrice?: number | null;
     stock?: number;
+    lowStockThreshold?: number;
     images?: string[];
     brand?: string | null;
     category?: string;
@@ -18,7 +19,7 @@ export interface ProductInput {
 
 const fields = new Set([
     "name", "slug", "description", "price", "discountPrice", "stock",
-    "images", "brand", "category", "specs", "isFeatured", "isActive",
+    "lowStockThreshold", "images", "brand", "category", "specs", "isFeatured", "isActive",
 ]);
 
 const invalid = (field: string): never => {
@@ -51,13 +52,13 @@ export const parseProductInput = (input: unknown, partial = false): ProductInput
                 validateObjectId(text, "category");
             }
             result[key] = text;
-        } else if (["price", "discountPrice", "stock"].includes(key)) {
+        } else if (["price", "discountPrice", "stock", "lowStockThreshold"].includes(key)) {
             if (key === "discountPrice" && value === null) {
                 result[key] = null;
                 continue;
             }
             if (typeof value !== "number" || !Number.isFinite(value) || value < 0 ||
-                (key === "stock" && !Number.isSafeInteger(value))) {
+                (["stock", "lowStockThreshold"].includes(key) && !Number.isSafeInteger(value))) {
                 invalid(key);
             }
             result[key] = value;
