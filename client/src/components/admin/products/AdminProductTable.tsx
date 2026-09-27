@@ -140,15 +140,22 @@ export const AdminProductTable = ({
                                     </td>
 
                                     <td className="whitespace-nowrap px-6 py-4">
-                                        <span
-                                            className={`text-sm font-medium ${
-                                                product.stock > 0
-                                                    ? "text-gray-700"
-                                                    : "text-red-600"
-                                            }`}
-                                        >
-                                            {product.stock}
-                                        </span>
+                                        {product.stock === 0 ? (
+                                            <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+                                                Agotado
+                                            </span>
+                                        ) : product.stock <= (product.lowStockThreshold ?? 5) ? (
+                                            <span
+                                                className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800"
+                                                title={`Umbral: ${product.lowStockThreshold ?? 5}`}
+                                            >
+                                                Stock bajo ({product.stock})
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                                                {product.stock} en stock
+                                            </span>
+                                        )}
                                     </td>
 
                                     <td className="whitespace-nowrap px-6 py-4">

@@ -186,3 +186,95 @@ export const deleteProduct = async (id: string) => {
     if (!product) throw new ApiError(404, "Product not found");
     return product;
 };
+
+export interface InventorySummary {
+    totalActive: number;
+    outOfStockCount: number;
+    lowStockCount: number;
+    healthyStockCount: number;
+}
+
+export type InventoryAlertFilter = "all" | "low_stock" | "out_of_stock";
+
+export const getInventoryAlerts = async (filter?: InventoryAlertFilter) => {
+    const products = await Product.find({ isActive: true })
+        .populate("category", "name slug")
+        .sort({ stock: 1, name: 1 });
+
+    let outOfStockCount = 0;
+    let lowStockCount = 0;
+    let healthyStockCount = 0;
+
+    const outOfStockProducts: typeof products = [];
+    const lowStockProducts: typeof products = [];
+
+    for (const product of products) {
+        const threshold = product.lowStockThreshold ?? 5;
+        if (product.stock === 0) {
+            outOfStockCount++;
+            outOfStockProducts.push(product);
+        } else if (product.stock <= threshold) {
+            lowStockCount++;
+            lowStockProducts.push(product);
+        } else {
+            healthyStockCount++;
+        }
+    }
+
+    const summary: InventorySummary = {
+        totalActive: products.length,
+        outOfStockCount,
+        lowStockCount,
+        healthyStockCount,
+    };
+
+    let alerts: typeof products;
+    if (filter === "out_of_stock") {
+        alerts = outOfStockProducts;
+    } else if (filter === "low_stock") {
+        alerts = lowStockProducts;
+    } else {
+        alerts = [...outOfStockProducts, ...lowStockProducts];
+    }
+
+    return {
+        summary,
+        alerts,
+    };
+};
+
+export const restockProduct = async (
+    id: string,
+    additionalStock: number,
+    newThreshold?: number
+) => {
+    validateObjectId(id, "product");
+
+    if (!Number.isSafeInteger(additionalStock) || additionalStock <= 0) {
+        throw new ApiError(400, "Additional stock must be a positive integer");
+    }
+
+    if (newThreshold !== undefined && (!Number.isSafeInteger(newThreshold) || newThreshold < 0)) {
+        throw new ApiError(400, "Low stock threshold must be a non-negative integer");
+    }
+
+    const update: Record<string, unknown> = {
+        $inc: { stock: additionalStock },
+    };
+
+    if (newThreshold !== undefined) {
+        update.$set = { lowStockThreshold: newThreshold };
+    }
+
+    const product = await Product.findByIdAndUpdate(
+        id,
+        update,
+        { returnDocument: "after", runValidators: true }
+    ).populate("category", "name slug");
+
+    if (!product) {
+        throw new ApiError(404, "Product not found");
+    }
+
+    return product;
+};

@@ -4,6 +4,8 @@ import type {
     CreateProductPayload,
     Product,
     UpdateProductPayload,
+    InventoryAlertFilter,
+    InventoryAlertsResponse,
 } from "../../types/product.types";
 
 interface ProductsResponse {
@@ -100,4 +102,32 @@ export interface SyncDummyResponse {
 export const syncDummyProducts = async (): Promise<SyncDummyResponse> => {
     const response = await api.post<SyncDummyResponse>("/products/sync-dummy");
     return response.data;
+};
+
+interface InventoryAlertsApiResponse {
+    success: boolean;
+    message: string;
+    data: InventoryAlertsResponse;
+}
+
+export const getInventoryAlerts = async (
+    filter?: InventoryAlertFilter
+): Promise<InventoryAlertsResponse> => {
+    const params = filter && filter !== "all" ? { filter } : undefined;
+    const response = await api.get<InventoryAlertsApiResponse>(
+        "/products/admin/inventory-alerts",
+        { params }
+    );
+    return response.data.data;
+};
+
+export const restockProduct = async (
+    productId: string,
+    payload: { additionalStock: number; lowStockThreshold?: number }
+): Promise<Product> => {
+    const response = await api.patch<ProductResponse>(
+        `/products/admin/${productId}/restock`,
+        payload
+    );
+    return response.data.data.product;
 };

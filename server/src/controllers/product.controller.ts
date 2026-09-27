@@ -8,7 +8,10 @@ import {
     updateProduct,
     getAdminProducts,
     getAdminProductById,
+    getInventoryAlerts,
+    restockProduct,
     type ProductFilterQuery,
+    type InventoryAlertFilter,
 } from "../services/product.service.js";
 import { syncDummyTechProducts } from "../services/dummy-product.service.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -185,6 +188,49 @@ export const syncDummyProductsController = async (
             success: true,
             message: "Products synchronized successfully from DummyJSON",
             data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getInventoryAlertsController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const filter = req.query.filter as InventoryAlertFilter | undefined;
+        const result = await getInventoryAlerts(filter);
+
+        res.status(200).json({
+            success: true,
+            message: "Inventory alerts retrieved successfully",
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const restockProductController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { id } = req.params;
+        if (!id || Array.isArray(id)) {
+            throw new ApiError(400, "Invalid product ID");
+        }
+
+        const { additionalStock, lowStockThreshold } = req.body;
+        const product = await restockProduct(id, additionalStock, lowStockThreshold);
+
+        res.status(200).json({
+            success: true,
+            message: "Product restocked successfully",
+            data: { product },
         });
     } catch (error) {
         next(error);

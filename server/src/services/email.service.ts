@@ -6,6 +6,7 @@ import {
     orderStatusUpdatedEmailTemplate,
     paymentConfirmedEmailTemplate,
     welcomeEmailTemplate,
+    lowStockAlertEmailTemplate,
 } from "../templates/email.templates.js";
 
 export { getSentEmails, clearSentEmails };
@@ -135,4 +136,34 @@ export const sendOrderStatusUpdatedEmail = async (
         html: template.html,
         text: template.text,
     });
+};
+
+export const sendLowStockAlertEmail = async (
+    product: { _id: unknown; name: string; lowStockThreshold?: number },
+    currentStock: number
+) => {
+    const admins = await User.find({ role: "admin", isActive: true }).select("email");
+    if (!admins.length) return [];
+
+    const threshold = product.lowStockThreshold ?? 5;
+    const template = lowStockAlertEmailTemplate({
+        productName: product.name,
+        productId: String(product._id),
+        currentStock,
+        threshold,
+    });
+
+    const sendPromises = admins.map((admin) =>
+        sendEmail({
+            to: admin.email,
+            subject: template.subject,
+            html: template.html,
+            text: template.text,
+        }).catch((err) => {
+            console.error(`[Email Service Error] Falló el envío de alerta a admin ${admin.email}:`, err);
+            return null;
+        })
+    );
+
+    return Promise.all(sendPromises);
 };

@@ -18,4 +18,5 @@ export const ROUTES = {
     adminCategories: "/admin/categories",
     adminOrders: "/admin/orders",
     adminCoupons: "/admin/coupons",
+    adminInventoryAlerts: "/admin/inventory-alerts",
 } as const;

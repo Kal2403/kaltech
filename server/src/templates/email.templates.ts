@@ -328,3 +328,64 @@ export const orderStatusUpdatedEmailTemplate = ({
         text,
     };
 };
+
+export const lowStockAlertEmailTemplate = ({
+    productName,
+    productId,
+    currentStock,
+    threshold,
+}: {
+    productName: string;
+    productId: string;
+    currentStock: number;
+    threshold: number;
+}): { subject: string; html: string; text: string } => {
+    const isOutOfStock = currentStock === 0;
+    const alertLabel = isOutOfStock ? "Agotado" : "Stock Bajo";
+    const badgeClass = isOutOfStock ? "badge-warning" : "badge-info";
+    const subject = isOutOfStock
+        ? `🚨 ¡Producto Agotado! ${productName} - KalTech Inventario`
+        : `⚠️ Alerta de Inventario: Stock Bajo en ${productName} - KalTech`;
+    const previewText = `El producto ${productName} tiene ${currentStock} unidades disponibles (umbral: ${threshold}).`;
+
+    const content = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <span class="badge ${badgeClass}" style="${isOutOfStock ? "background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;" : ""}">${alertLabel}</span>
+        </div>
+        <h1 style="color: #0f172a; font-size: 22px; font-weight: 800; margin-top: 0; text-align: center;">
+            ${isOutOfStock ? "Producto Agotado en Catálogo" : "Stock Crítico de Producto"}
+        </h1>
+        <p style="text-align: center; color: #475569; font-size: 16px;">
+            El producto <strong>${productName}</strong> ha alcanzado un nivel de inventario que requiere atención.
+        </p>
+
+        <div class="card" style="padding: 24px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="color: #64748b; font-size: 14px; padding: 6px 0;">Stock actual:</td>
+                    <td style="text-align: right; font-weight: 800; font-size: 16px; color: ${isOutOfStock ? "#dc2626" : "#d97706"};">${currentStock} unidades</td>
+                </tr>
+                <tr>
+                    <td style="color: #64748b; font-size: 14px; padding: 6px 0;">Umbral configurado:</td>
+                    <td style="text-align: right; font-weight: 600; font-size: 14px; color: #0f172a;">${threshold} unidades</td>
+                </tr>
+                <tr>
+                    <td style="color: #64748b; font-size: 14px; padding: 6px 0;">ID de producto:</td>
+                    <td style="text-align: right; font-family: monospace; font-size: 13px; color: #64748b;">${productId}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="http://localhost:5173/admin/inventory-alerts" class="button">Gestionar Inventario en KalTech</a>
+        </div>
+    `;
+
+    const text = `Alerta de Inventario KalTech: El producto ${productName} tiene ${currentStock} unidades disponibles (umbral de alerta: ${threshold}). Gestionar en http://localhost:5173/admin/inventory-alerts`;
+
+    return {
+        subject,
+        html: baseEmailLayout(subject, previewText, content),
+        text,
+    };
+};

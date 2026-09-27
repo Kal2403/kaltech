@@ -28,6 +28,7 @@ interface ProductFormValues {
     price: string;
     discountPrice: string;
     stock: string;
+    lowStockThreshold: string;
     images: string;
     brand: string;
     category: string;
@@ -42,6 +43,7 @@ interface ProductFormErrors {
     price?: string;
     discountPrice?: string;
     stock?: string;
+    lowStockThreshold?: string;
     images?: string;
     category?: string;
     specs?: string;
@@ -85,6 +87,10 @@ const getInitialValues = (
                 ? String(product.discountPrice)
                 : "",
         stock: product ? String(product.stock) : "",
+        lowStockThreshold:
+            product?.lowStockThreshold !== undefined
+                ? String(product.lowStockThreshold)
+                : "5",
         images: product?.images.join("\n") ?? "",
         brand: product?.brand ?? "",
         category: product?.category?._id ?? "",
@@ -370,6 +376,14 @@ export const ProductForm = ({
                 "El stock debe ser un número entero mayor o igual que cero.";
         }
 
+        const lowStockThreshold = Number(values.lowStockThreshold);
+        if (values.lowStockThreshold.trim()) {
+            if (!Number.isInteger(lowStockThreshold) || lowStockThreshold < 0) {
+                validationErrors.lowStockThreshold =
+                    "El umbral debe ser un número entero mayor o igual que cero.";
+            }
+        }
+
         if (!values.category) {
             validationErrors.category =
                 "Debes seleccionar una categoría.";
@@ -440,6 +454,10 @@ export const ProductForm = ({
             isFeatured: values.isFeatured,
             isActive: values.isActive,
         };
+
+        if (values.lowStockThreshold.trim()) {
+            payload.lowStockThreshold = Number(values.lowStockThreshold);
+        }
 
         const brand = values.brand.trim();
         const specs = buildSpecifications();
@@ -674,7 +692,7 @@ export const ProductForm = ({
                     </p>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
                         <label
                             htmlFor="price"
@@ -752,6 +770,33 @@ export const ProductForm = ({
                         {errors.stock && (
                             <p className="mt-2 text-sm text-red-600">
                                 {errors.stock}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="lowStockThreshold"
+                            className="mb-2 block text-sm font-medium text-gray-700"
+                        >
+                            Umbral de alerta
+                        </label>
+
+                        <input
+                            id="lowStockThreshold"
+                            name="lowStockThreshold"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={values.lowStockThreshold}
+                            onChange={handleTextChange}
+                            disabled={isSubmitting}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-100"
+                        />
+
+                        {errors.lowStockThreshold && (
+                            <p className="mt-2 text-sm text-red-600">
+                                {errors.lowStockThreshold}
                             </p>
                         )}
                     </div>
