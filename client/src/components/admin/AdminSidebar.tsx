@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
+    FiAlertTriangle,
     FiBox,
     FiGrid,
     FiHome,
@@ -37,6 +38,11 @@ const adminLinks = [
         label: "Cupones",
         path: ROUTES.adminCoupons,
         icon: FiTag,
+    },
+    {
+        label: "Alertas de Stock",
+        path: ROUTES.adminInventoryAlerts,
+        icon: FiAlertTriangle,
     },
 ];
 

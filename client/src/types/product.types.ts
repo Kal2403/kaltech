@@ -24,6 +24,7 @@ export interface Product {
     price: number;
     discountPrice?: number;
     stock: number;
+    lowStockThreshold?: number;
     images: string[];
     brand?: string;
     category: ProductCategory | null;
@@ -42,6 +43,7 @@ export interface CreateProductPayload {
     price: number;
     discountPrice?: number | null;
     stock: number;
+    lowStockThreshold?: number;
     images: string[];
     brand?: string | null;
     category: string;
@@ -51,3 +53,17 @@ export interface CreateProductPayload {
 }
 
 export type UpdateProductPayload = Partial<CreateProductPayload>;
+
+export interface InventorySummary {
+    totalActive: number;
+    outOfStockCount: number;
+    lowStockCount: number;
+    healthyStockCount: number;
+}
+
+export type InventoryAlertFilter = "all" | "low_stock" | "out_of_stock";
+
+export interface InventoryAlertsResponse {
+    summary: InventorySummary;
+    alerts: Product[];
+}

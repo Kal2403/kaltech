@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FiArrowRight, FiBox, FiDollarSign, FiLayers, FiShoppingBag } from "react-icons/fi";
+import { FiAlertTriangle, FiArrowRight, FiBox, FiDollarSign, FiLayers, FiShoppingBag, FiTag } from "react-icons/fi";
 import { DashboardStatCard } from "../../components/admin/DashboardStatCard";
 import { ROUTES } from "../../routes/paths";
 
@@ -14,6 +14,8 @@ const managementLinks = [
     { title: "Gestionar productos", description: "Crea, revisa y actualiza los productos del catálogo.", path: ROUTES.adminProducts, icon: FiBox },
     { title: "Gestionar categorías", description: "Organiza los productos mediante categorías claras.", path: ROUTES.adminCategories, icon: FiLayers },
     { title: "Gestionar órdenes", description: "Consulta pedidos y actualiza su estado operativo.", path: ROUTES.adminOrders, icon: FiShoppingBag },
+    { title: "Cupones de descuento", description: "Configura promociones y códigos de descuento.", path: ROUTES.adminCoupons, icon: FiTag },
+    { title: "Alertas de inventario", description: "Monitorea existencias críticas y reabastece productos.", path: ROUTES.adminInventoryAlerts, icon: FiAlertTriangle },
 ];
 
 export const DashboardPage = () => (
