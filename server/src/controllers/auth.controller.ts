@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 
-import { loginUser, registerUser } from "../services/auth.service.js";
+import {
+    loginUser,
+    registerUser,
+    requestPasswordReset,
+    resetPassword as resetPasswordService,
+} from "../services/auth.service.js";
 
 export const register = async (
     req: Request,
@@ -46,4 +51,40 @@ export const getMe = async (req: Request, res: Response) => {
             user: req.user,
         },
     });
+};
+
+export const forgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await requestPasswordReset(req.body);
+
+        res.status(200).json({
+            success: true,
+            message: result.message,
+            data: null,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await resetPasswordService(req.body);
+
+        res.status(200).json({
+            success: true,
+            message: result.message,
+            data: null,
+        });
+    } catch (error) {
+        next(error);
+    }
 };

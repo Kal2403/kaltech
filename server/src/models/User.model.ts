@@ -20,6 +20,8 @@ export interface IUser extends Document {
     avatar?: string;
     addresses: IUserAddress[];
     isActive: boolean;
+    resetPasswordToken?: string;
+    resetPasswordExpires?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -108,6 +110,14 @@ const userSchema = new Schema<IUser>(
         isActive: {
             type: Boolean,
             default: true,
+        },
+        resetPasswordToken: {
+            type: String,
+            select: false,
+        },
+        resetPasswordExpires: {
+            type: Date,
+            select: false,
         },
     },
     {

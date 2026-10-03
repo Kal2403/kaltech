@@ -45,5 +45,32 @@ export const createAuthRateLimiters = () => {
                 .update(req.body.email.trim().toLowerCase())
                 .digest("hex"),
         }),
+        forgotPasswordIp: rateLimit({
+            ...common,
+            windowMs: 15 * 60 * 1000,
+            limit: 10,
+            identifier: "forgot-password-ip",
+            requestPropertyName: "forgotPasswordIpRateLimit",
+        }),
+        forgotPasswordAccount: rateLimit({
+            ...common,
+            windowMs: 60 * 60 * 1000,
+            limit: 5,
+            identifier: "forgot-password-account",
+            requestPropertyName: "forgotPasswordAccountRateLimit",
+            skip: (req) => typeof req.body?.email !== "string" ||
+                req.body.email.trim().length > 254 ||
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.body.email.trim()),
+            keyGenerator: (req) => createHmac("sha256", accountKeySecret)
+                .update(req.body.email.trim().toLowerCase())
+                .digest("hex"),
+        }),
+        resetPasswordIp: rateLimit({
+            ...common,
+            windowMs: 15 * 60 * 1000,
+            limit: 10,
+            identifier: "reset-password-ip",
+            requestPropertyName: "resetPasswordIpRateLimit",
+        }),
     };
 };
