@@ -138,6 +138,7 @@ export const CheckoutForm = ({
         });
 
         if (order) {
+            let paymentFailed = false;
             if (paymentMethod === 'card') {
                 try {
                     setIsPaying(true);
@@ -147,11 +148,30 @@ export const CheckoutForm = ({
                     });
                 } catch (payErr) {
                     console.error('Payment error:', payErr);
+                    paymentFailed = true;
+                } finally {
+                    setIsPaying(false);
+                }
+            } else if (paymentMethod === 'paypal') {
+                try {
+                    setIsPaying(true);
+                    await payOrder(order._id, {
+                        method: 'paypal',
+                        paypal: { orderId: `PP-${order._id}` },
+                    });
+                } catch (payErr) {
+                    console.error('PayPal payment error:', payErr);
+                    paymentFailed = true;
                 } finally {
                     setIsPaying(false);
                 }
             }
-            navigate(`/orders/${order._id}`);
+
+            if (paymentFailed) {
+                navigate(`/orders/${order._id}?payment_failed=true`);
+            } else {
+                navigate(`/orders/${order._id}`);
+            }
         }
     };
 

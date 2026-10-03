@@ -8,6 +8,7 @@ import {
     payOrder,
     processCardPayment,
     processPayPalPayment,
+    processWebhookEvent,
 } from "../services/payment.service.js";
 import { ApiError } from "../utils/ApiError.js";
 import { validateObjectId } from "../utils/validateObjectId.js";
@@ -88,11 +89,18 @@ export const getPaymentConfigController = async (
     next: NextFunction
 ) => {
     try {
+        const stripeKey = process.env.STRIPE_PUBLISHABLE_KEY || "";
+        const paypalClientId = process.env.PAYPAL_CLIENT_ID || "";
+        const mode = process.env.NODE_ENV === "production" ? "production" : "sandbox";
+
         res.status(200).json({
             success: true,
             data: {
                 supportedMethods: ["card", "paypal", "cash"],
                 currency: "EUR",
+                mode,
+                stripePublishableKey: stripeKey || undefined,
+                paypalClientId: paypalClientId || undefined,
                 testCards: [
                     {
                         brand: "Visa",
@@ -106,6 +114,32 @@ export const getPaymentConfigController = async (
                     },
                 ],
             },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const handlePaymentWebhookController = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const rawProvider = req.params.provider || req.query.provider || req.body?.provider || "stripe";
+        const provider = rawProvider === "paypal" ? "paypal" : "stripe";
+        const signatureHeader = (
+            req.headers["stripe-signature"] ||
+            req.headers["paypal-transmission-sig"] ||
+            ""
+        ) as string;
+
+        const result = await processWebhookEvent(provider, req.body, signatureHeader);
+
+        res.status(200).json({
+            success: true,
+            message: result.message,
+            data: result,
         });
     } catch (error) {
         next(error);
