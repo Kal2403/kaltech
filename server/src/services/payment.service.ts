@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import {
     Order,
     type IOrder,
@@ -25,6 +26,7 @@ export interface ProcessPaymentInput {
     method: "card" | "paypal" | "cash";
     card?: CardPaymentInput;
     paypal?: PayPalPaymentInput;
+    idempotencyKey?: string;
 }
 
 export const isValidLuhn = (cardNumber: string): boolean => {
@@ -160,6 +162,12 @@ export const payOrder = async (
     }
 
     if (order.paymentStatus === "paid") {
+        if (
+            paymentInput.idempotencyKey &&
+            order.paymentResult?.id === paymentInput.idempotencyKey
+        ) {
+            return order;
+        }
         throw new ApiError(400, "Order is already paid");
     }
 
@@ -187,31 +195,259 @@ export const payOrder = async (
         throw new ApiError(400, "Invalid payment method. Allowed: card, paypal, cash");
     }
 
-    order.paymentMethod = paymentInput.method;
-    order.paymentStatus = "paid";
-    order.paidAt = new Date();
-    order.paymentResult = paymentResult;
-
-    if (order.orderStatus === "pending") {
-        order.orderStatus = "processing";
+    if (paymentInput.idempotencyKey) {
+        paymentResult.id = paymentInput.idempotencyKey;
     }
 
-    if (!order.timeline) {
-        order.timeline = [];
-    }
-
-    order.timeline.push({
-        status: order.orderStatus,
+    const nextOrderStatus = order.orderStatus === "pending" ? "processing" : order.orderStatus;
+    const timelineEvent = {
+        status: nextOrderStatus,
         title: "Pago verificado",
         description: `Pago registrado exitosamente vía ${paymentInput.method.toUpperCase()}. Identificador: ${paymentResult.id}`,
         timestamp: new Date(),
-    });
+    };
 
-    await order.save();
+    const updatedOrder = await Order.findOneAndUpdate(
+        {
+            _id: validOrderId,
+            paymentStatus: { $ne: "paid" },
+            orderStatus: { $ne: "cancelled" },
+        },
+        {
+            $set: {
+                paymentMethod: paymentInput.method,
+                paymentStatus: "paid",
+                paidAt: new Date(),
+                paymentResult,
+                ...(order.orderStatus === "pending" ? { orderStatus: "processing" } : {}),
+            },
+            $push: {
+                timeline: timelineEvent,
+            },
+        },
+        { new: true }
+    );
 
-    void sendPaymentConfirmedEmail(order).catch((err) => {
+    if (!updatedOrder) {
+        const freshOrder = await Order.findById(validOrderId);
+        if (freshOrder?.paymentStatus === "paid") {
+            if (
+                paymentInput.idempotencyKey &&
+                freshOrder.paymentResult?.id === paymentInput.idempotencyKey
+            ) {
+                return freshOrder;
+            }
+            throw new ApiError(400, "Order is already paid");
+        }
+        throw new ApiError(400, "Cannot pay for a cancelled order");
+    }
+
+    void sendPaymentConfirmedEmail(updatedOrder).catch((err) => {
         console.error("[Email Error] No se pudo enviar el correo de confirmación de pago:", err);
     });
 
-    return order;
+    return updatedOrder;
+};
+
+export interface WebhookProcessingResult {
+    received: boolean;
+    orderId?: string;
+    status: "processed" | "ignored" | "duplicate";
+    message: string;
+}
+
+export const processWebhookEvent = async (
+    provider: "stripe" | "paypal",
+    payload: Record<string, unknown>,
+    signatureHeader?: string
+): Promise<WebhookProcessingResult> => {
+    if (provider !== "stripe" && provider !== "paypal") {
+        throw new ApiError(400, "Invalid webhook provider");
+    }
+
+    if (provider === "stripe") {
+        const stripeSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        if (stripeSecret) {
+            if (!signatureHeader) {
+                throw new ApiError(400, "Missing Stripe signature header");
+            }
+            const elements = signatureHeader.split(",");
+            const timestamp = elements.find((el) => el.startsWith("t="))?.replace("t=", "");
+            const v1Sig = elements.find((el) => el.startsWith("v1="))?.replace("v1=", "");
+            if (!timestamp || !v1Sig) {
+                throw new ApiError(400, "Invalid Stripe signature format");
+            }
+            const expectedSig = createHmac("sha256", stripeSecret)
+                .update(`${timestamp}.${JSON.stringify(payload)}`)
+                .digest("hex");
+            if (expectedSig !== v1Sig) {
+                throw new ApiError(400, "Stripe signature verification failed");
+            }
+        }
+
+        const eventType = String(payload.type || "");
+        if (
+            eventType !== "checkout.session.completed" &&
+            eventType !== "payment_intent.succeeded"
+        ) {
+            return {
+                received: true,
+                status: "ignored",
+                message: `Stripe event ${eventType} ignored`,
+            };
+        }
+
+        const dataObject = (payload.data as { object?: Record<string, unknown> })?.object || {};
+        const metadata = (dataObject.metadata as Record<string, unknown>) || {};
+        const rawOrderId =
+            metadata.orderId ||
+            dataObject.client_reference_id ||
+            metadata.order_id;
+
+        if (!rawOrderId || typeof rawOrderId !== "string") {
+            return {
+                received: true,
+                status: "ignored",
+                message: "No order ID found in Stripe event metadata",
+            };
+        }
+
+        const validOrderId = validateObjectId(rawOrderId, "order");
+        const order = await Order.findById(validOrderId);
+        if (!order) {
+            throw new ApiError(404, "Order not found for Stripe webhook");
+        }
+
+        if (order.paymentStatus === "paid") {
+            return {
+                received: true,
+                orderId: validOrderId,
+                status: "duplicate",
+                message: "Order already paid",
+            };
+        }
+
+        const transactionId = String(dataObject.id || `STRIPE-${Date.now()}`);
+        order.paymentMethod = "card";
+        order.paymentStatus = "paid";
+        order.paidAt = new Date();
+        order.paymentResult = {
+            id: transactionId,
+            status: "COMPLETED",
+            update_time: new Date().toISOString(),
+            method: "stripe",
+        };
+
+        if (order.orderStatus === "pending") {
+            order.orderStatus = "processing";
+        }
+
+        order.timeline = order.timeline || [];
+        order.timeline.push({
+            status: order.orderStatus,
+            title: "Pago verificado vía Stripe",
+            description: `Pago procesado automáticamente mediante webhook de Stripe. Identificador: ${transactionId}`,
+            timestamp: new Date(),
+        });
+
+        await order.save();
+
+        void sendPaymentConfirmedEmail(order).catch((err) => {
+            console.error("[Email Error] Falló confirmación de correo tras webhook de Stripe:", err);
+        });
+
+        return {
+            received: true,
+            orderId: validOrderId,
+            status: "processed",
+            message: "Stripe payment processed successfully",
+        };
+    }
+
+    if (provider === "paypal") {
+        const paypalWebhookId = process.env.PAYPAL_WEBHOOK_ID;
+        if (paypalWebhookId && !signatureHeader) {
+            throw new ApiError(400, "Missing PayPal signature header");
+        }
+
+        const eventType = String(payload.event_type || "");
+        if (
+            eventType !== "PAYMENT.CAPTURE.COMPLETED" &&
+            eventType !== "CHECKOUT.ORDER.APPROVED"
+        ) {
+            return {
+                received: true,
+                status: "ignored",
+                message: `PayPal event ${eventType} ignored`,
+            };
+        }
+
+        const resource = (payload.resource as Record<string, unknown>) || {};
+        const rawOrderId =
+            resource.custom_id ||
+            resource.invoice_id ||
+            (resource.supplementary_data as { related_ids?: { order_id?: string } })
+                ?.related_ids?.order_id;
+
+        if (!rawOrderId || typeof rawOrderId !== "string") {
+            return {
+                received: true,
+                status: "ignored",
+                message: "No order ID found in PayPal webhook resource",
+            };
+        }
+
+        const validOrderId = validateObjectId(rawOrderId, "order");
+        const order = await Order.findById(validOrderId);
+        if (!order) {
+            throw new ApiError(404, "Order not found for PayPal webhook");
+        }
+
+        if (order.paymentStatus === "paid") {
+            return {
+                received: true,
+                orderId: validOrderId,
+                status: "duplicate",
+                message: "Order already paid",
+            };
+        }
+
+        const transactionId = String(resource.id || `PAYPAL-${Date.now()}`);
+        order.paymentMethod = "paypal";
+        order.paymentStatus = "paid";
+        order.paidAt = new Date();
+        order.paymentResult = {
+            id: transactionId,
+            status: "COMPLETED",
+            update_time: new Date().toISOString(),
+            method: "paypal",
+        };
+
+        if (order.orderStatus === "pending") {
+            order.orderStatus = "processing";
+        }
+
+        order.timeline = order.timeline || [];
+        order.timeline.push({
+            status: order.orderStatus,
+            title: "Pago verificado vía PayPal",
+            description: `Pago procesado automáticamente mediante webhook de PayPal. Identificador: ${transactionId}`,
+            timestamp: new Date(),
+        });
+
+        await order.save();
+
+        void sendPaymentConfirmedEmail(order).catch((err) => {
+            console.error("[Email Error] Falló confirmación de correo tras webhook de PayPal:", err);
+        });
+
+        return {
+            received: true,
+            orderId: validOrderId,
+            status: "processed",
+            message: "PayPal payment processed successfully",
+        };
+    }
+
+    throw new ApiError(400, "Unsupported provider");
 };

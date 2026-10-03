@@ -24,6 +24,9 @@ interface ProcessPaymentResponse {
 export interface PaymentConfig {
     supportedMethods: string[];
     currency: string;
+    mode?: "sandbox" | "production" | string;
+    stripePublishableKey?: string;
+    paypalClientId?: string;
     testCards?: Array<{
         brand: string;
         number: string;

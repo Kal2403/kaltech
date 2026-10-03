@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { OrderItem, OrderSummary, OrderTimeline, PaymentModal } from "../components/orders";
 import { useOrderDetails } from "../hooks/useOrderDetails";
 import { ROUTES } from "../routes/paths";
 
 export const OrderDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
+    const [searchParams] = useSearchParams();
     const { order, isLoading, error, reloadOrder } = useOrderDetails(id);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const paymentFailed = searchParams.get("payment_failed") === "true";
 
     if (isLoading) {
         return (
@@ -75,6 +77,31 @@ export const OrderDetailsPage = () => {
                     </h1>
                     <p className="mt-3 text-slate-600">Realizada el {date}</p>
                 </header>
+
+                {paymentFailed && order.paymentStatus !== "paid" && (
+                    <div
+                        role="alert"
+                        className="mb-8 rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-900 shadow-sm"
+                    >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 className="text-base font-bold text-amber-900">
+                                    El pedido fue registrado, pero el pago quedó pendiente
+                                </h3>
+                                <p className="mt-1 text-sm text-amber-800">
+                                    No pudimos procesar el cobro automático. Puedes reintentar el pago ahora con tu tarjeta o PayPal para que comencemos a preparar tu pedido.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsPaymentModalOpen(true)}
+                                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-amber-600 px-5 font-bold text-white shadow-md transition hover:bg-amber-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+                            >
+                                Pagar ahora
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
                     <div className="space-y-8">
