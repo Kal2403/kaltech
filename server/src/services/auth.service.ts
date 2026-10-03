@@ -1,9 +1,10 @@
+import { createHash, randomBytes } from "node:crypto";
 import bcrypt from "bcryptjs";
 
 import { User } from "../models/User.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { generateToken } from "../utils/generateToken.js";
-import { sendWelcomeEmail } from "./email.service.js";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "./email.service.js";
 
 interface RegisterInput {
     name: string;
@@ -65,6 +66,51 @@ const parseLoginInput = (input: unknown): LoginInput => {
     }
 
     return { email, password };
+};
+
+interface ForgotPasswordInput {
+    email: string;
+}
+
+interface ResetPasswordInput {
+    token: string;
+    password: string;
+}
+
+const parseForgotPasswordInput = (input: unknown): ForgotPasswordInput => {
+    if (!isRecord(input)) {
+        throw new ApiError(400, "Email is required");
+    }
+
+    const email = typeof input.email === "string" ? normalizeEmail(input.email) : "";
+
+    if (!emailPattern.test(email) || email.length > 254) {
+        throw new ApiError(400, "A valid email is required");
+    }
+
+    return { email };
+};
+
+const parseResetPasswordInput = (input: unknown): ResetPasswordInput => {
+    if (!isRecord(input)) {
+        throw new ApiError(400, "Token and password are required");
+    }
+
+    const token = typeof input.token === "string" ? input.token.trim() : "";
+    const password = typeof input.password === "string" ? input.password : "";
+
+    if (!token) {
+        throw new ApiError(400, "Token is required");
+    }
+
+    if (password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
+        throw new ApiError(
+            400,
+            "Password must contain at least 8 characters and at most 72 UTF-8 bytes"
+        );
+    }
+
+    return { token, password };
 };
 
 const isDuplicateKeyError = (error: unknown): boolean =>
@@ -154,5 +200,57 @@ export const loginUser = async (input: unknown) => {
             role: user.role,
         },
         token,
+    };
+};
+
+export const requestPasswordReset = async (input: unknown) => {
+    const { email } = parseForgotPasswordInput(input);
+    const user = await User.findOne({ email });
+
+    if (user && user.isActive) {
+        const rawToken = randomBytes(32).toString("hex");
+        const hashedToken = createHash("sha256").update(rawToken).digest("hex");
+
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+        await user.save();
+
+        void sendPasswordResetEmail(user.email, user.name, rawToken).catch((err) => {
+            console.error("[Email Error] No se pudo enviar el correo de restablecimiento:", err);
+        });
+    }
+
+    return {
+        message:
+            "Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.",
+    };
+};
+
+export const resetPassword = async (input: unknown) => {
+    const { token, password } = parseResetPasswordInput(input);
+    const hashedToken = createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: new Date() },
+    }).select("+resetPasswordToken +resetPasswordExpires");
+
+    if (!user) {
+        throw new ApiError(400, "El token de recuperación es inválido o ha expirado");
+    }
+
+    if (!user.isActive) {
+        throw new ApiError(403, "User account is inactive");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    return {
+        message:
+            "Contraseña actualizada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.",
     };
 };

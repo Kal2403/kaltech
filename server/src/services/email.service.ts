@@ -7,6 +7,7 @@ import {
     paymentConfirmedEmailTemplate,
     welcomeEmailTemplate,
     lowStockAlertEmailTemplate,
+    forgotPasswordEmailTemplate,
 } from "../templates/email.templates.js";
 
 export { getSentEmails, clearSentEmails };
@@ -44,6 +45,23 @@ export const sendEmail = async ({
 
 export const sendWelcomeEmail = async (email: string, name: string) => {
     const template = welcomeEmailTemplate({ name });
+    return sendEmail({
+        to: email,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+    });
+};
+
+export const sendPasswordResetEmail = async (
+    email: string,
+    name: string,
+    resetToken: string
+) => {
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    const resetUrl = `${clientUrl.replace(/\/+$/, "")}/reset-password/${resetToken}`;
+    const template = forgotPasswordEmailTemplate({ name, resetUrl });
+
     return sendEmail({
         to: email,
         subject: template.subject,

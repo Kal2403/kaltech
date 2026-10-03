@@ -389,3 +389,44 @@ export const lowStockAlertEmailTemplate = ({
         text,
     };
 };
+
+export const forgotPasswordEmailTemplate = ({
+    name,
+    resetUrl,
+}: {
+    name: string;
+    resetUrl: string;
+}): { subject: string; html: string; text: string } => {
+    const subject = "Recuperación de contraseña - KalTech";
+    const previewText = "Has solicitado restablecer tu contraseña en KalTech.";
+
+    const content = `
+        <h1 style="color: #0f172a; font-size: 22px; font-weight: 800; margin-top: 0;">Restablecer contraseña</h1>
+        <p>Hola <strong>${name}</strong>,</p>
+        <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong>KalTech</strong>. Haz clic en el botón a continuación para crear una nueva contraseña:</p>
+
+        <div style="text-align: center; margin: 32px 0;">
+            <a href="${resetUrl}" class="button" target="_blank" rel="noopener noreferrer">Restablecer mi Contraseña</a>
+        </div>
+
+        <div class="card">
+            <p style="margin: 0; font-size: 13px; color: #64748b;">
+                Este enlace es válido por <strong>1 hora</strong> y solo puede usarse una vez.<br>
+                Si no solicitaste este cambio, puedes ignorar este correo; tu contraseña actual continuará siendo segura.
+            </p>
+        </div>
+
+        <p style="font-size: 12px; color: #94a3b8; word-break: break-all; margin-top: 24px;">
+            Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:<br>
+            <a href="${resetUrl}" style="color: #2563eb;">${resetUrl}</a>
+        </p>
+    `;
+
+    const text = `Hola ${name},\n\nRecibimos una solicitud para restablecer tu contraseña en KalTech.\n\nAccede al siguiente enlace para crear una nueva contraseña (válido por 1 hora):\n${resetUrl}\n\nSi no solicitaste este cambio, puedes ignorar este mensaje.\n\nEl equipo de KalTech`;
+
+    return {
+        subject,
+        html: baseEmailLayout(subject, previewText, content),
+        text,
+    };
+};

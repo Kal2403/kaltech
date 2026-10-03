@@ -49,6 +49,26 @@ export const getMe = async (signal?: AbortSignal): Promise<AuthUser> => {
     return data.data.user;
 };
 
+export const forgotPassword = async (email: string): Promise<string> => {
+    const { data } = await api.post<ApiResponse<null>>("/auth/forgot-password", {
+        email,
+    });
+
+    return data.message;
+};
+
+export const resetPassword = async (
+    token: string,
+    password: string
+): Promise<string> => {
+    const { data } = await api.post<ApiResponse<null>>("/auth/reset-password", {
+        token,
+        password,
+    });
+
+    return data.message;
+};
+
 export const getAuthErrorMessage = (
     error: unknown,
     fallbackMessage: string
