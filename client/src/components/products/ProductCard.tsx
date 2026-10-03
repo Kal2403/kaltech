@@ -27,17 +27,21 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                         <StarRating rating={product.rating} size="sm" showValue={true} />
                     )}
                 </div>
-                {product.brand && (
-                    <p className="mt-0.5 text-xs font-medium text-slate-500">{product.brand}</p>
-                )}
-                <h2 className="mt-1.5 line-clamp-2 text-lg font-black leading-snug text-slate-950">{product.name}</h2>
-                <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{product.description}</p>
-                <div className="mt-4 flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-slate-950">${finalPrice}</span>
-                    {hasDiscount && <span className="text-sm font-semibold text-slate-400 line-through">${product.price}</span>}
+                <div className="min-h-4">
+                    {product.brand ? (
+                        <p className="mt-0.5 text-xs font-medium text-slate-500 truncate">{product.brand}</p>
+                    ) : null}
                 </div>
-                <p className={`mt-2 flex items-center gap-1.5 text-xs font-bold ${product.stock > 0 ? "text-emerald-600" : "text-red-600"}`}><FiPackage aria-hidden="true" />{product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"}</p>
-                <Link to={`/products/${product._id}`} className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Ver detalles <FiArrowRight aria-hidden="true" /></Link>
+                <h2 className="mt-1.5 line-clamp-2 min-h-[3.25rem] text-lg font-black leading-snug text-slate-950">{product.name}</h2>
+                <p className="mt-2 line-clamp-2 min-h-[3rem] text-sm leading-6 text-slate-600">{product.description}</p>
+                <div className="mt-auto pt-4 flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-slate-950">${finalPrice}</span>
+                        {hasDiscount && <span className="text-sm font-semibold text-slate-400 line-through">${product.price}</span>}
+                    </div>
+                    <p className={`mt-2 flex items-center gap-1.5 text-xs font-bold ${product.stock > 0 ? "text-emerald-600" : "text-red-600"}`}><FiPackage aria-hidden="true" />{product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"}</p>
+                    <Link to={`/products/${product._id}`} className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Ver detalles <FiArrowRight aria-hidden="true" /></Link>
+                </div>
             </div>
         </article>
     );

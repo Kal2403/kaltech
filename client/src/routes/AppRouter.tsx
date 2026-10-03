@@ -20,6 +20,10 @@ import { ProfilePage } from "../pages/ProfilePage";
 import { WishlistPage } from "../pages/WishlistPage";
 import { CategoriesPage } from "../pages/CategoriesPage";
 import { OffersPage } from "../pages/OffersPage";
+import { ContactPage } from "../pages/ContactPage";
+import { PrivacyPage } from "../pages/PrivacyPage";
+import { ShippingPage } from "../pages/ShippingPage";
+import { TermsPage } from "../pages/TermsPage";
 
 import { AdminCategoriesPage } from "../pages/admin/AdminCategoriesPage";
 import { AdminCouponsPage } from "../pages/admin/AdminCouponsPage";
@@ -65,6 +69,22 @@ const router = createBrowserRouter([
             {
                 path: "wishlist",
                 element: <WishlistPage />,
+            },
+            {
+                path: "terms",
+                element: <TermsPage />,
+            },
+            {
+                path: "privacy",
+                element: <PrivacyPage />,
+            },
+            {
+                path: "shipping",
+                element: <ShippingPage />,
+            },
+            {
+                path: "contact",
+                element: <ContactPage />,
             },
             {
                 element: <ProtectedRoute />,

@@ -13,6 +13,11 @@ export const ROUTES = {
     login: "/login",
     register: "/register",
 
+    terms: "/terms",
+    privacy: "/privacy",
+    shipping: "/shipping",
+    contact: "/contact",
+
     admin: "/admin",
     adminProducts: "/admin/products",
     adminCategories: "/admin/categories",

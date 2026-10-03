@@ -22,15 +22,17 @@ export const FeaturedProductsSection = () => (
 
             <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {featuredProducts.map((product) => (
-                    <article key={product.name} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70">
+                    <article key={product.name} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70">
                         <div className="aspect-[4/3] overflow-hidden bg-slate-100 p-4">
                             <img src={product.image} alt={product.name} className="h-full w-full rounded-xl object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
                         </div>
-                        <div className="p-5">
+                        <div className="flex flex-1 flex-col p-5">
                             <p className="text-xs font-black uppercase tracking-wider text-blue-600">{product.category}</p>
-                            <h3 className="mt-2 text-lg font-black text-slate-950">{product.name}</h3>
-                            <div className="mt-4 flex items-baseline gap-2"><span className="text-2xl font-black text-slate-950">${product.price}</span><span className="text-sm font-semibold text-slate-400 line-through">${product.oldPrice}</span></div>
-                            <Link to="/products" className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Ver detalles</Link>
+                            <h3 className="mt-2 line-clamp-2 min-h-[3.25rem] text-lg font-black text-slate-950">{product.name}</h3>
+                            <div className="mt-auto pt-4 flex flex-col">
+                                <div className="flex items-baseline gap-2"><span className="text-2xl font-black text-slate-950">${product.price}</span><span className="text-sm font-semibold text-slate-400 line-through">${product.oldPrice}</span></div>
+                                <Link to="/products" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Ver detalles</Link>
+                            </div>
                         </div>
                     </article>
                 ))}
