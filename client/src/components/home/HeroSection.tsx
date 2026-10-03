@@ -29,7 +29,7 @@ export const HeroSection = () => {
             <div className="relative overflow-hidden bg-[#061637] text-white">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_45%,rgba(37,99,235,0.24),transparent_36%),linear-gradient(110deg,#06132f_0%,#0a1e49_54%,#102b67_100%)]" />
 
-                <div className="relative mx-auto grid min-h-[33.5rem] max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-8 lg:py-20 xl:min-h-[36rem]">
+                <div className="relative mx-auto grid min-h-[33.5rem] max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8 lg:py-20 xl:min-h-[36rem]">
                     <div className="max-w-xl lg:py-3">
                         <span className="inline-flex rounded-full border border-blue-400/50 bg-blue-500/10 px-4 py-1.5 text-[0.65rem] font-black uppercase tracking-[0.23em] text-blue-400">
                             Nueva temporada 2026
