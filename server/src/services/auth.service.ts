@@ -173,7 +173,7 @@ export const loginUser = async (input: unknown) => {
     const { email, password } = parseLoginInput(input);
     const user = await User.findOne({ email }).select("+password");
 
-    if (!user) {
+    if (!user || !user.password) {
         throw new ApiError(401, "Invalid email or password");
     }
 

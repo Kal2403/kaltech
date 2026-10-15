@@ -13,6 +13,8 @@ export interface AuthContextValue {
     sessionExpired: boolean;
     login: (credentials: LoginCredentials) => Promise<AuthUser>;
     register: (registration: RegisterData) => Promise<AuthUser>;
+    loginWithGoogle: (credential: string) => Promise<AuthUser>;
+    loginWithFacebook: (accessToken: string) => Promise<AuthUser>;
     logout: () => void;
     clearSessionNotice: () => void;
 }

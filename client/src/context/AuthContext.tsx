@@ -9,6 +9,8 @@ import {
 import {
     getMe,
     login as loginRequest,
+    loginWithFacebook as facebookLoginRequest,
+    loginWithGoogle as googleLoginRequest,
     register as registerRequest,
 } from "../services/auth/auth.service";
 import type {
@@ -101,6 +103,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return session.user;
     }, []);
 
+    const loginWithGoogle = useCallback(async (credential: string) => {
+        const session = await googleLoginRequest(credential);
+        storage.setToken(session.token);
+        setUser(session.user);
+        setSessionExpired(false);
+        return session.user;
+    }, []);
+
+    const loginWithFacebook = useCallback(async (accessToken: string) => {
+        const session = await facebookLoginRequest(accessToken);
+        storage.setToken(session.token);
+        setUser(session.user);
+        setSessionExpired(false);
+        return session.user;
+    }, []);
+
     const value = useMemo<AuthContextValue>(
         () => ({
             user,
@@ -109,10 +127,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             sessionExpired,
             login,
             register,
+            loginWithGoogle,
+            loginWithFacebook,
             logout,
             clearSessionNotice,
         }),
-        [clearSessionNotice, isInitializing, login, logout, register, sessionExpired, user]
+        [
+            clearSessionNotice,
+            isInitializing,
+            login,
+            loginWithFacebook,
+            loginWithGoogle,
+            logout,
+            register,
+            sessionExpired,
+            user,
+        ]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

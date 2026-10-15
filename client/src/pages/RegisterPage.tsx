@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ROUTES } from "../routes/paths";
 import { getAuthErrorMessage } from "../services/auth/auth.service";
+import { SocialAuthButtons } from "../components/auth/SocialAuthButtons";
 
 export const RegisterPage = () => {
     const { register } = useAuth();
@@ -58,6 +59,9 @@ export const RegisterPage = () => {
                     <div className="sm:col-span-2"><label htmlFor="register-password" className="mb-2 block text-sm font-bold text-slate-800">Contraseña</label><input id="register-password" type="password" autoComplete="new-password" required minLength={8} aria-invalid={Boolean(fieldErrors.password)} aria-describedby="register-password-help register-password-error" value={password} onChange={(event) => { setPassword(event.target.value); setFieldErrors((current) => ({ ...current, password: undefined })); }} className="min-h-12 w-full rounded-xl border border-slate-300 px-4 text-slate-950 focus:border-blue-600" /><p id="register-password-help" className="mt-2 text-xs text-slate-500">Al menos 8 caracteres. Hasta 72 letras sin acentos o números; con acentos o símbolos, el límite puede ser menor.</p>{fieldErrors.password && <p id="register-password-error" className="mt-2 text-sm font-semibold text-red-700">{fieldErrors.password}</p>}</div>
                     <button type="submit" disabled={isSubmitting || isInvalid} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2">{isSubmitting ? "Creando cuenta…" : <>Crear cuenta <FiArrowRight aria-hidden="true" /></>}</button>
                 </form>
+
+                <SocialAuthButtons />
+
                 <p className="mt-7 text-center text-sm text-slate-600">¿Ya tienes cuenta? <Link to={ROUTES.login} state={location.state} className="inline-flex min-h-11 items-center rounded-md px-2 font-extrabold text-blue-600 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Inicia sesión</Link></p>
             </div>
         </section>

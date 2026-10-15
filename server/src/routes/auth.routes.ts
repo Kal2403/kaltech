@@ -3,6 +3,9 @@ import { Router } from "express";
 import {
     forgotPassword,
     getMe,
+    getSocialConfig,
+    googleAuth,
+    facebookAuth,
     login,
     register,
     resetPassword,
@@ -13,8 +16,11 @@ import { createAuthRateLimiters } from "../middlewares/auth-rate-limit.middlewar
 const router = Router();
 const limits = createAuthRateLimiters();
 
+router.get("/config", getSocialConfig);
 router.post("/register", limits.registerIp, register);
 router.post("/login", limits.loginIp, limits.loginAccount, login);
+router.post("/google", limits.socialAuthIp, googleAuth);
+router.post("/facebook", limits.socialAuthIp, facebookAuth);
 router.post(
     "/forgot-password",
     limits.forgotPasswordIp,

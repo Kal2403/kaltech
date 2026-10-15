@@ -14,8 +14,11 @@ export interface IUserAddress {
 export interface IUser extends Document {
     name: string;
     email: string;
-    password: string;
+    password?: string;
     role: "customer" | "admin";
+    googleId?: string;
+    facebookId?: string;
+    authProvider?: "local" | "google" | "facebook";
     phone?: string;
     avatar?: string;
     addresses: IUserAddress[];
@@ -84,7 +87,9 @@ const userSchema = new Schema<IUser>(
         },
         password: {
             type: String,
-            required: [true, "Password is required"],
+            required: function (this: IUser) {
+                return !this.googleId && !this.facebookId;
+            },
             minlength: 8,
             select: false,
         },
@@ -92,6 +97,21 @@ const userSchema = new Schema<IUser>(
             type: String,
             enum: ["customer", "admin"],
             default: "customer",
+        },
+        googleId: {
+            type: String,
+            sparse: true,
+            index: true,
+        },
+        facebookId: {
+            type: String,
+            sparse: true,
+            index: true,
+        },
+        authProvider: {
+            type: String,
+            enum: ["local", "google", "facebook"],
+            default: "local",
         },
         phone: {
             type: String,

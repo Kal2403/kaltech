@@ -72,5 +72,12 @@ export const createAuthRateLimiters = () => {
             identifier: "reset-password-ip",
             requestPropertyName: "resetPasswordIpRateLimit",
         }),
+        socialAuthIp: rateLimit({
+            ...common,
+            windowMs: 15 * 60 * 1000,
+            limit: 30,
+            identifier: "social-auth-ip",
+            requestPropertyName: "socialAuthIpRateLimit",
+        }),
     };
 };

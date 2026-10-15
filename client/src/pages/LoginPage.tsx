@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ROUTES } from "../routes/paths";
 import { getAuthErrorMessage } from "../services/auth/auth.service";
+import { SocialAuthButtons } from "../components/auth/SocialAuthButtons";
 
 const getSafeDestination = (state: unknown): string | null => {
     if (!state || typeof state !== "object" || !("from" in state)) return null;
@@ -80,6 +81,9 @@ export const LoginPage = () => {
                         </div>
                         <button type="submit" disabled={isSubmitting || !email.trim() || password.length < 8} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? "Iniciando sesión…" : <>Acceder <FiArrowRight aria-hidden="true" /></>}</button>
                     </form>
+
+                    <SocialAuthButtons />
+
                     <p className="mt-7 text-center text-sm text-slate-600">¿Aún no tienes cuenta? <Link to={ROUTES.register} state={location.state} className="inline-flex min-h-11 items-center rounded-md px-2 font-extrabold text-blue-600 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Regístrate</Link></p>
                 </div>
             </div>
