@@ -6,6 +6,7 @@ import type {
     AuthUser,
     LoginCredentials,
     RegisterData,
+    SocialAuthConfig,
 } from "../../types/auth.types";
 
 interface ApiResponse<T> {
@@ -35,6 +36,36 @@ export const register = async (
     const { data } = await api.post<ApiResponse<AuthSession>>(
         "/auth/register",
         registration
+    );
+
+    return data.data;
+};
+
+export const loginWithGoogle = async (
+    credential: string
+): Promise<AuthSession> => {
+    const { data } = await api.post<ApiResponse<AuthSession>>(
+        "/auth/google",
+        { credential }
+    );
+
+    return data.data;
+};
+
+export const loginWithFacebook = async (
+    accessToken: string
+): Promise<AuthSession> => {
+    const { data } = await api.post<ApiResponse<AuthSession>>(
+        "/auth/facebook",
+        { accessToken }
+    );
+
+    return data.data;
+};
+
+export const getSocialAuthConfig = async (): Promise<SocialAuthConfig> => {
+    const { data } = await api.get<ApiResponse<SocialAuthConfig>>(
+        "/auth/config"
     );
 
     return data.data;

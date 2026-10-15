@@ -5,6 +5,7 @@ export interface AuthUser {
     name: string;
     email: string;
     role: UserRole;
+    avatar?: string;
 }
 
 export interface LoginCredentials {
@@ -19,4 +20,9 @@ export interface RegisterData extends LoginCredentials {
 export interface AuthSession {
     user: AuthUser;
     token: string;
+}
+
+export interface SocialAuthConfig {
+    googleClientId: string | null;
+    facebookAppId: string | null;
 }

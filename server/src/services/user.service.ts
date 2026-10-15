@@ -78,9 +78,11 @@ export const changeUserPassword = async (
         throw new ApiError(404, "User not found");
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-        throw new ApiError(400, "Incorrect current password");
+    if (user.password) {
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            throw new ApiError(400, "Incorrect current password");
+        }
     }
 
     if (newPassword.length < 8 || Buffer.byteLength(newPassword, "utf8") > 72) {
